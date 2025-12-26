@@ -64,7 +64,6 @@ export default function RegisterScreen() {
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        role: selectedRole,
       });
 
       // Navigate to respective dashboard based on role
