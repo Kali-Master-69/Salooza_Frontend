@@ -1,7 +1,8 @@
-import { ArrowLeft, Bell, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { AppBar, Toolbar, Typography, IconButton, Box, Badge, alpha } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SearchIcon from "@mui/icons-material/Search";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 
 interface HeaderProps {
   title?: string;
@@ -9,7 +10,7 @@ interface HeaderProps {
   showSearch?: boolean;
   showNotifications?: boolean;
   transparent?: boolean;
-  className?: string;
+  className?: string; // Kept for compatibility but mostly unused
 }
 
 export function Header({
@@ -18,48 +19,51 @@ export function Header({
   showSearch = false,
   showNotifications = false,
   transparent = false,
-  className,
 }: HeaderProps) {
   const navigate = useNavigate();
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 safe-top",
-        transparent ? "bg-transparent" : "glass border-b border-border/50",
-        className
-      )}
+    <AppBar
+      position="fixed"
+      color="transparent"
+      elevation={0}
+      sx={{
+        bgcolor: transparent ? "transparent" : (theme) => alpha(theme.palette.background.default, 0.8),
+        backdropFilter: transparent ? "none" : "blur(10px)",
+        borderBottom: transparent ? "none" : 1,
+        borderColor: "divider",
+        zIndex: (theme) => theme.zIndex.appBar,
+      }}
     >
-      <div className="mx-auto max-w-lg flex items-center justify-between px-4 h-14">
-        <div className="flex items-center gap-3">
+      <Toolbar sx={{ justifyContent: "space-between", minHeight: 56 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           {showBack && (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => navigate(-1)}
-              className="text-foreground"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
+            <IconButton onClick={() => navigate(-1)} edge="start" color="inherit">
+              <ArrowBackIcon />
+            </IconButton>
           )}
           {title && (
-            <h1 className="text-lg font-semibold text-foreground">{title}</h1>
+            <Typography variant="h6" component="div" fontWeight="bold">
+              {title}
+            </Typography>
           )}
-        </div>
-        <div className="flex items-center gap-2">
+        </Box>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           {showSearch && (
-            <Button variant="ghost" size="icon-sm" className="text-foreground">
-              <Search className="h-5 w-5" />
-            </Button>
+            <IconButton color="inherit">
+              <SearchIcon />
+            </IconButton>
           )}
           {showNotifications && (
-            <Button variant="ghost" size="icon-sm" className="text-foreground relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-primary" />
-            </Button>
+            <IconButton color="inherit">
+              <Badge badgeContent={1} color="primary" variant="dot">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
           )}
-        </div>
-      </div>
-    </header>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 }

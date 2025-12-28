@@ -1,9 +1,9 @@
 import { createTheme, alpha } from '@mui/material/styles';
 
 // Custom color palette - dark theme with gold accents
-const goldAccent = '#C9A227';
-const goldLight = '#E5C76B';
-const goldDark = '#9A7B1A';
+const goldAccent = 'hsl(38, 45%, 60%)'; // Champagne Gold
+const goldLight = 'hsl(38, 50%, 70%)';   // Light Gold
+const goldDark = 'hsl(38, 40%, 45%)';    // Bronze Gold
 const darkBg = '#0A0A0A';
 const darkSurface = '#141414';
 const darkCard = '#1A1A1A';
@@ -39,7 +39,10 @@ export const muiTheme = createTheme({
       main: '#4ADE80',
     },
     warning: {
-      main: goldAccent,
+      main: goldAccent, // Keeping consistent gold for warnings if needed, per user intent to not introduce yellow
+    },
+    info: {
+      main: '#60A5FA', // Neutral blue if needed
     },
   },
   typography: {
@@ -83,15 +86,28 @@ export const muiTheme = createTheme({
           fontSize: '1rem',
         },
         containedPrimary: {
-          background: `linear-gradient(135deg, ${goldAccent} 0%, ${goldDark} 100%)`,
+          backgroundColor: goldAccent,
+          background: `linear-gradient(135deg, ${goldAccent} 0%, ${goldDark} 100%)`, // Subtle gradient
+          color: '#000000',
           '&:hover': {
+            backgroundColor: goldLight,
             background: `linear-gradient(135deg, ${goldLight} 0%, ${goldAccent} 100%)`,
+          },
+          '&:active': {
+            backgroundColor: goldDark,
           },
         },
         outlinedPrimary: {
           borderColor: goldAccent,
+          color: goldAccent,
           '&:hover': {
             borderColor: goldLight,
+            backgroundColor: alpha(goldAccent, 0.1),
+          },
+        },
+        textPrimary: {
+          color: goldAccent,
+          '&:hover': {
             backgroundColor: alpha(goldAccent, 0.1),
           },
         },
@@ -103,12 +119,18 @@ export const muiTheme = createTheme({
           '& .MuiOutlinedInput-root': {
             borderRadius: 12,
             backgroundColor: alpha('#FFFFFF', 0.05),
+            '& fieldset': {
+              borderColor: alpha('#FFFFFF', 0.2),
+            },
             '&:hover .MuiOutlinedInput-notchedOutline': {
               borderColor: alpha(goldAccent, 0.5),
             },
             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
               borderColor: goldAccent,
             },
+          },
+          '& .MuiInputLabel-root.Mui-focused': {
+            color: goldAccent,
           },
         },
       },
@@ -175,6 +197,10 @@ export const muiTheme = createTheme({
           backgroundColor: alpha(goldAccent, 0.2),
           color: goldAccent,
         },
+        outlined: {
+          borderColor: goldAccent,
+          color: goldAccent,
+        },
       },
     },
     MuiDialog: {
@@ -182,6 +208,7 @@ export const muiTheme = createTheme({
         paper: {
           backgroundColor: darkCard,
           borderRadius: 16,
+          border: `1px solid ${alpha('#FFFFFF', 0.1)}`,
         },
       },
     },
@@ -200,6 +227,22 @@ export const muiTheme = createTheme({
       styleOverrides: {
         indicator: {
           backgroundColor: goldAccent,
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: alpha(goldAccent, 0.1),
+          },
+        },
+      },
+    },
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          color: '#FFFFFF',
         },
       },
     },

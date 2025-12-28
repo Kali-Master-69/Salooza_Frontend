@@ -1,23 +1,29 @@
-import { motion } from "framer-motion";
-import { 
-  Users, 
-  Store, 
-  Scissors, 
-  TrendingUp,
-  ChevronRight,
-  UserPlus,
-  Settings
-} from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  CardActionArea,
+  Button,
+  Stack,
+  alpha,
+  Grid,
+} from "@mui/material";
+import GroupIcon from "@mui/icons-material/Group";
+import StoreIcon from "@mui/icons-material/Store";
+import ContentCutIcon from "@mui/icons-material/ContentCut";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import SettingsIcon from "@mui/icons-material/Settings";
 import { BottomNav } from "@/components/layout/BottomNav";
 
 const stats = [
-  { label: "Total Users", value: "1,234", icon: Users, change: "+12%" },
-  { label: "Active Shops", value: "45", icon: Store, change: "+5%" },
-  { label: "Total Barbers", value: "89", icon: Scissors, change: "+8%" },
-  { label: "Revenue", value: "$12.5K", icon: TrendingUp, change: "+15%" },
+  { label: "Total Users", value: "1,234", icon: GroupIcon, change: "+12%" },
+  { label: "Active Shops", value: "45", icon: StoreIcon, change: "+5%" },
+  { label: "Total Barbers", value: "89", icon: ContentCutIcon, change: "+8%" },
+  { label: "Revenue", value: "$12.5K", icon: TrendingUpIcon, change: "+15%" },
 ];
 
 const recentUsers = [
@@ -27,126 +33,127 @@ const recentUsers = [
 ];
 
 const quickActions = [
-  { label: "Add User", icon: UserPlus, path: "/admin/users" },
-  { label: "Manage Shops", icon: Store, path: "/admin/shops" },
-  { label: "Settings", icon: Settings, path: "/admin/settings" },
+  { label: "Add User", icon: PersonAddIcon, path: "/admin/users" },
+  { label: "Manage Shops", icon: StoreIcon, path: "/admin/shops" },
+  { label: "Settings", icon: SettingsIcon, path: "/admin/settings" },
 ];
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 12 }}>
       {/* Header */}
-      <div className="px-4 pt-12 pb-6">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-2xl font-display font-bold text-foreground">
-            Admin Dashboard
-          </h1>
-          <p className="text-muted-foreground mt-1">System Overview</p>
-        </motion.div>
-      </div>
+      <Box sx={{ px: 3, pt: 6, pb: 4 }}>
+        <Typography variant="h4" fontWeight="bold">
+          Admin Dashboard
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          System Overview
+        </Typography>
+      </Box>
 
       {/* Stats Grid */}
-      <div className="px-4 mb-6">
-        <div className="grid grid-cols-2 gap-3">
-          {stats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-            >
-              <Card className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <stat.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <span className="text-xs text-green-400 font-medium">
-                    {stat.change}
-                  </span>
-                </div>
-                <p className="text-2xl font-bold text-foreground mt-3">
-                  {stat.value}
-                </p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
+      <Box sx={{ px: 3, mb: 4 }}>
+        <Grid container spacing={2}>
+          {stats.map((stat) => (
+            <Grid item xs={6} key={stat.label}>
+              <Card sx={{ borderRadius: 3 }}>
+                <CardContent sx={{ p: 2 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                    <Box
+                      sx={{
+                        p: 1,
+                        borderRadius: 1.5,
+                        bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                        color: "primary.main",
+                        display: "flex",
+                      }}
+                    >
+                      <stat.icon fontSize="small" />
+                    </Box>
+                    <Typography variant="caption" color="success.main" fontWeight="bold">
+                      {stat.change}
+                    </Typography>
+                  </Stack>
+                  <Typography variant="h5" fontWeight="bold" sx={{ mt: 2 }}>
+                    {stat.value}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">{stat.label}</Typography>
+                </CardContent>
               </Card>
-            </motion.div>
+            </Grid>
           ))}
-        </div>
-      </div>
+        </Grid>
+      </Box>
 
       {/* Quick Actions */}
-      <div className="px-4 mb-6">
-        <h2 className="text-lg font-semibold text-foreground mb-4">
+      <Box sx={{ px: 3, mb: 4 }}>
+        <Typography variant="h6" fontWeight="bold" gutterBottom>
           Quick Actions
-        </h2>
-        <div className="flex gap-3">
+        </Typography>
+        <Stack direction="row" spacing={2}>
           {quickActions.map((action) => (
             <Button
               key={action.label}
-              variant="dark"
-              className="flex-1 flex-col h-auto py-4 gap-2"
+              variant="contained"
+              color="secondary"
+              sx={{
+                flex: 1,
+                py: 2,
+                flexDirection: "column",
+                gap: 1,
+                borderRadius: 3,
+                textTransform: "none",
+              }}
               onClick={() => navigate(action.path)}
             >
-              <action.icon className="h-6 w-6" />
-              <span className="text-xs">{action.label}</span>
+              <action.icon />
+              <Typography variant="caption" fontWeight="medium">{action.label}</Typography>
             </Button>
           ))}
-        </div>
-      </div>
+        </Stack>
+      </Box>
 
       {/* Recent Users */}
-      <div className="px-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">
-            Recent Users
-          </h2>
-          <button
-            onClick={() => navigate("/admin/users")}
-            className="text-sm text-primary flex items-center gap-1"
-          >
-            View all <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="space-y-3">
-          {recentUsers.map((user, index) => (
-            <motion.div
-              key={user.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-            >
-              <Card variant="interactive" className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                      <Users className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-foreground">
-                        {user.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {user.role}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {user.joined}
-                  </span>
-                </div>
-              </Card>
-            </motion.div>
+      <Box sx={{ px: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+          <Typography variant="h6" fontWeight="bold">Recent Users</Typography>
+          <Button endIcon={<ChevronRightIcon />} size="small">View all</Button>
+        </Box>
+        <Stack spacing={2}>
+          {recentUsers.map((user) => (
+            <Card key={user.id} sx={{ borderRadius: 3 }}>
+              <CardActionArea sx={{ p: 2 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Box
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                        bgcolor: "action.hover",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <GroupIcon color="action" />
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight="bold">{user.name}</Typography>
+                      <Typography variant="caption" color="text.secondary">{user.role}</Typography>
+                    </Box>
+                  </Stack>
+                  <Typography variant="caption" color="text.secondary">{user.joined}</Typography>
+                </Stack>
+              </CardActionArea>
+            </Card>
           ))}
-        </div>
-      </div>
+        </Stack>
+      </Box>
 
       <BottomNav />
-    </div>
+    </Box>
   );
 }

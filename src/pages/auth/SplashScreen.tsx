@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Box, Button, Typography, Stack, IconButton, alpha, useTheme } from "@mui/material";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import heroBarber from "@/assets/hero-barber.jpg";
 import salonInterior from "@/assets/salon-interior.jpg";
 import barberPortrait from "@/assets/barber-portrait.jpg";
@@ -28,6 +27,7 @@ const slides = [
 export default function SplashScreen() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const navigate = useNavigate();
+  const theme = useTheme();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -49,82 +49,131 @@ export default function SplashScreen() {
   };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-background">
-      {/* Background Image */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentSlide}
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.7 }}
-          className="absolute inset-0"
+    <Box
+      sx={{
+        position: "relative",
+        minHeight: "100vh",
+        width: "100%",
+        overflow: "hidden",
+        bgcolor: "background.default",
+      }}
+    >
+      {/* Background Images */}
+      {slides.map((slide, index) => (
+        <Box
+          key={index}
+          sx={{
+            position: "absolute",
+            inset: 0,
+            opacity: currentSlide === index ? 1 : 0,
+            transition: "opacity 0.7s ease-in-out",
+            zIndex: 0,
+          }}
         >
-          <img
-            src={slides[currentSlide].image}
-            alt="Barber shop"
-            className="h-full w-full object-cover"
+          <Box
+            component="img"
+            src={slide.image}
+            alt="Slide"
+            sx={{
+              height: "100%",
+              width: "100%",
+              objectFit: "cover",
+            }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-        </motion.div>
-      </AnimatePresence>
+          <Box
+            sx={{
+              position: "absolute",
+              inset: 0,
+              background: `linear-gradient(to top, ${theme.palette.background.default} 0%, ${alpha(
+                theme.palette.background.default,
+                0.6
+              )} 50%, transparent 100%)`,
+            }}
+          />
+        </Box>
+      ))}
 
       {/* Content */}
-      <div className="relative z-10 flex min-h-screen flex-col justify-end p-6 pb-12">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentSlide}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -30 }}
-            transition={{ duration: 0.5 }}
-            className="space-y-4"
+      <Box
+        sx={{
+          position: "relative",
+          zIndex: 10,
+          display: "flex",
+          minHeight: "100vh",
+          flexDirection: "column",
+          justifyContent: "flex-end",
+          p: 3,
+          pb: 6,
+        }}
+      >
+        <Box sx={{ mb: 4, transition: "all 0.5s ease" }}>
+          <Typography
+            variant="h3"
+            gutterBottom
+            sx={{
+              fontWeight: 700,
+              color: "text.primary",
+              maxWidth: "md",
+            }}
           >
-            <h1 className="font-display text-3xl font-bold leading-tight text-foreground md:text-4xl">
-              {slides[currentSlide].title}
-            </h1>
-            <p className="text-base text-muted-foreground">
-              {slides[currentSlide].description}
-            </p>
-          </motion.div>
-        </AnimatePresence>
+            {slides[currentSlide].title}
+          </Typography>
+          <Typography variant="body1" sx={{ color: "text.secondary", maxWidth: "sm" }}>
+            {slides[currentSlide].description}
+          </Typography>
+        </Box>
 
         {/* Navigation */}
-        <div className="mt-8 flex items-center justify-between">
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ mt: 2 }}
+        >
           {/* Dots */}
-          <div className="flex gap-2">
+          <Stack direction="row" spacing={1}>
             {slides.map((_, index) => (
-              <button
+              <Box
                 key={index}
                 onClick={() => setCurrentSlide(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  index === currentSlide
-                    ? "w-8 bg-primary"
-                    : "w-2 bg-muted-foreground/30"
-                }`}
+                sx={{
+                  height: 8,
+                  width: index === currentSlide ? 32 : 8,
+                  borderRadius: 4,
+                  bgcolor: index === currentSlide ? "primary.main" : alpha(theme.palette.text.secondary, 0.3),
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                }}
               />
             ))}
-          </div>
+          </Stack>
 
           {/* Next Button */}
-          <Button
-            variant="gold"
-            size="icon"
+          <IconButton
             onClick={handleNext}
-            className="h-14 w-14 rounded-full"
+            sx={{
+              bgcolor: "primary.main",
+              color: "primary.contrastText",
+              width: 56,
+              height: 56,
+              "&:hover": {
+                bgcolor: "primary.light",
+              },
+            }}
           >
-            <ArrowRight className="h-6 w-6" />
-          </Button>
-        </div>
+            <ArrowForwardIcon />
+          </IconButton>
+        </Stack>
 
         {/* Skip */}
-        <button
+        <Button
           onClick={handleSkip}
-          className="mt-6 text-center text-sm text-muted-foreground"
+          variant="text"
+          sx={{ mt: 3, alignSelf: "center", color: "text.secondary" }}
         >
           Skip to Get Started
-        </button>
-      </div>
-    </div>
+        </Button>
+      </Box>
+    </Box>
   );
 }

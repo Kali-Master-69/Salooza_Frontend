@@ -42,13 +42,13 @@ export default function RoleSelectScreen() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { selectRole } = useAuth();
-  
+
   const mode = searchParams.get("mode") || "register";
   const isLogin = mode === "login";
 
   const handleRoleSelect = (role: UserRole) => {
     selectRole(role);
-    navigate(isLogin ? `/auth/login?role=${role}` : `/auth/register?role=${role}`);
+    navigate(isLogin ? `/login?role=${role}` : `/register?role=${role}`);
   };
 
   return (

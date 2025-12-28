@@ -1,29 +1,30 @@
 import { ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import { Box, Container } from "@mui/material";
 
 interface MobileLayoutProps {
   children: ReactNode;
-  className?: string;
+  className?: string; // Keep for param compat, usually useless with MUI Box sx
   hasNavbar?: boolean;
   hasTabBar?: boolean;
 }
 
 export function MobileLayout({
   children,
-  className,
   hasNavbar = false,
   hasTabBar = false,
 }: MobileLayoutProps) {
   return (
-    <div
-      className={cn(
-        "min-h-screen w-full bg-background",
-        hasNavbar && "pt-14",
-        hasTabBar && "pb-20",
-        className
-      )}
+    <Box
+      sx={{
+        minHeight: "100vh",
+        bgcolor: "background.default",
+        pt: hasNavbar ? "56px" : 0, // 56px matches Toolbar minHeight
+        pb: hasTabBar ? "64px" : 0, // 64px matches BottomNav height
+      }}
     >
-      <div className="mx-auto max-w-lg">{children}</div>
-    </div>
+      <Container maxWidth="sm" disableGutters sx={{ p: 0 }}>
+        {children}
+      </Container>
+    </Box>
   );
 }

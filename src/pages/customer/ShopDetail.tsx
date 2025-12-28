@@ -1,10 +1,29 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowLeft, Star, MapPin, Clock, Phone, Heart, Share2, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import {
+  Box,
+  Typography,
+  IconButton,
+  Button,
+  Card,
+  CardContent,
+  CardActionArea,
+  Avatar,
+  Stack,
+  alpha,
+  Paper,
+} from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import ShareIcon from "@mui/icons-material/Share";
+import StarIcon from "@mui/icons-material/Star";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import PhoneIcon from "@mui/icons-material/Phone";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
+
 import salonInterior from "@/assets/salon-interior.jpg";
 import barberPortrait from "@/assets/barber-portrait.jpg";
 
@@ -57,198 +76,215 @@ export default function ShopDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 16 }}>
       {/* Hero Image */}
-      <div className="relative h-64">
-        <img
+      <Box sx={{ position: "relative", height: 256 }}>
+        <Box
+          component="img"
           src={salonInterior}
           alt="Shop"
-          className="h-full w-full object-cover"
+          sx={{ height: "100%", width: "100%", objectFit: "cover" }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)",
+          }}
+        />
 
         {/* Top Actions */}
-        <div className="absolute top-4 left-4 right-4 flex justify-between safe-top">
-          <Button
-            variant="icon-circle"
-            size="icon"
+        <Box
+          sx={{
+            position: "absolute",
+            top: 16,
+            left: 16,
+            right: 16,
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <IconButton
             onClick={() => navigate(-1)}
-            className="bg-background/50 backdrop-blur-sm"
+            sx={{ bgcolor: "background.paper", "&:hover": { bgcolor: "background.default" } }}
           >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="flex gap-2">
-            <Button
-              variant="icon-circle"
-              size="icon"
-              className="bg-background/50 backdrop-blur-sm"
+            <ArrowBackIcon fontSize="small" />
+          </IconButton>
+          <Stack direction="row" spacing={1}>
+            <IconButton
               onClick={() => setIsFavorite(!isFavorite)}
+              sx={{ bgcolor: "background.paper", "&:hover": { bgcolor: "background.default" } }}
             >
-              <Heart
-                className={cn("h-5 w-5", isFavorite && "fill-primary text-primary")}
-              />
-            </Button>
-            <Button
-              variant="icon-circle"
-              size="icon"
-              className="bg-background/50 backdrop-blur-sm"
+              {isFavorite ? <FavoriteIcon color="error" fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
+            </IconButton>
+            <IconButton
+              sx={{ bgcolor: "background.paper", "&:hover": { bgcolor: "background.default" } }}
             >
-              <Share2 className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </div>
+              <ShareIcon fontSize="small" />
+            </IconButton>
+          </Stack>
+        </Box>
+      </Box>
 
       {/* Content */}
-      <div className="px-4 -mt-8 relative z-10 pb-32">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {/* Shop Info */}
-          <Card className="p-4 mb-6">
-            <h1 className="text-2xl font-display font-bold text-foreground">
+      <Box sx={{ px: 2, mt: -4, position: "relative", zIndex: 10 }}>
+        {/* Shop Info */}
+        <Card sx={{ mb: 3, borderRadius: 3 }}>
+          <CardContent>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
               Stylish Barber Shop
-            </h1>
-            <div className="flex items-center gap-4 mt-3 text-sm">
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 text-primary fill-primary" />
-                <span className="text-foreground font-medium">4.5</span>
-                <span className="text-muted-foreground">(120 reviews)</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              127 Nature Lodge, Chicago
-            </div>
-            <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-              <Clock className="h-4 w-4" />
-              Open: 9:00 AM - 9:00 PM
-            </div>
-            <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-              <Phone className="h-4 w-4" />
-              +1 234 567 890
-            </div>
-          </Card>
+            </Typography>
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+              <StarIcon fontSize="small" color="primary" />
+              <Typography variant="body2" fontWeight="bold">4.5</Typography>
+              <Typography variant="body2" color="text.secondary">(120 reviews)</Typography>
+            </Stack>
+            <Stack spacing={1} sx={{ mt: 2 }}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <LocationOnIcon fontSize="small" color="action" />
+                <Typography variant="body2" color="text.secondary">127 Nature Lodge, Chicago</Typography>
+              </Stack>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <AccessTimeIcon fontSize="small" color="action" />
+                <Typography variant="body2" color="text.secondary">Open: 9:00 AM - 9:00 PM</Typography>
+              </Stack>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <PhoneIcon fontSize="small" color="action" />
+                <Typography variant="body2" color="text.secondary">+1 234 567 890</Typography>
+              </Stack>
+            </Stack>
+          </CardContent>
+        </Card>
 
-          {/* Barbers */}
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-foreground mb-4">
-              Our Barbers
-            </h2>
-            <div className="flex gap-4 overflow-x-auto pb-2">
-              {barbers.map((barber) => (
-                <div key={barber.id} className="flex flex-col items-center">
-                  <div
-                    className={cn(
-                      "w-16 h-16 rounded-full overflow-hidden border-2",
-                      barber.available
-                        ? "border-green-500"
-                        : "border-muted opacity-50"
-                    )}
-                  >
-                    <img
-                      src={barber.image}
-                      alt={barber.name}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <p className="text-sm font-medium text-foreground mt-2">
-                    {barber.name}
-                  </p>
-                  <p
-                    className={cn(
-                      "text-xs",
-                      barber.available
-                        ? "text-green-400"
-                        : "text-muted-foreground"
-                    )}
-                  >
-                    {barber.available ? "Available" : "Busy"}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Barbers */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom>
+            Our Barbers
+          </Typography>
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{
+              overflowX: "auto",
+              pb: 1,
+              "&::-webkit-scrollbar": { display: "none" },
+              scrollbarWidth: "none",
+            }}
+          >
+            {barbers.map((barber) => (
+              <Box key={barber.id} sx={{ textAlign: "center", minWidth: 70 }}>
+                <Box
+                  sx={{
+                    position: "relative",
+                    display: "inline-block",
+                    borderRadius: "50%",
+                    p: 0.3,
+                    border: 2,
+                    borderColor: barber.available ? "success.main" : "text.disabled",
+                  }}
+                >
+                  <Avatar src={barber.image} sx={{ width: 60, height: 60 }} />
+                </Box>
+                <Typography variant="body2" fontWeight="medium" sx={{ mt: 1 }}>
+                  {barber.name}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color={barber.available ? "success.main" : "text.secondary"}
+                >
+                  {barber.available ? "Available" : "Busy"}
+                </Typography>
+              </Box>
+            ))}
+          </Stack>
+        </Box>
 
-          {/* Services */}
-          <div>
-            <h2 className="text-lg font-semibold text-foreground mb-4">
-              Select Services
-            </h2>
-            <div className="space-y-3">
-              {services.map((service) => {
-                const isSelected = selectedServices.includes(service.id);
-                return (
-                  <Card
-                    key={service.id}
-                    variant="interactive"
-                    className={cn(
-                      "p-4 transition-all",
-                      isSelected && "border-primary bg-primary/5"
-                    )}
-                    onClick={() => toggleService(service.id)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-medium text-foreground">
-                          {service.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {service.duration} min
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <span className="text-lg font-semibold text-primary">
+        {/* Services */}
+        <Box>
+          <Typography variant="h6" fontWeight="bold" gutterBottom>
+            Select Services
+          </Typography>
+          <Stack spacing={1.5}>
+            {services.map((service) => {
+              const isSelected = selectedServices.includes(service.id);
+              return (
+                <Card
+                  key={service.id}
+                  sx={{
+                    borderRadius: 2,
+                    border: 1,
+                    borderColor: isSelected ? "primary.main" : "divider",
+                    bgcolor: isSelected ? (theme) => alpha(theme.palette.primary.main, 0.05) : "background.paper",
+                  }}
+                >
+                  <CardActionArea onClick={() => toggleService(service.id)} sx={{ p: 2 }}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Box>
+                        <Typography variant="subtitle1" fontWeight="medium">{service.name}</Typography>
+                        <Typography variant="body2" color="text.secondary">{service.duration} min</Typography>
+                      </Box>
+                      <Stack direction="row" alignItems="center" spacing={2}>
+                        <Typography variant="h6" color="primary.main" fontWeight="bold">
                           ${service.price}
-                        </span>
-                        <div
-                          className={cn(
-                            "h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors",
-                            isSelected
-                              ? "border-primary bg-primary"
-                              : "border-muted"
-                          )}
-                        >
-                          {isSelected && (
-                            <Check className="h-4 w-4 text-primary-foreground" />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
-          </div>
-        </motion.div>
-      </div>
+                        </Typography>
+                        {isSelected ? (
+                          <CheckCircleIcon color="primary" />
+                        ) : (
+                          <CircleOutlinedIcon color="disabled" />
+                        )}
+                      </Stack>
+                    </Stack>
+                  </CardActionArea>
+                </Card>
+              );
+            })}
+          </Stack>
+        </Box>
+      </Box>
 
       {/* Bottom Bar */}
       {selectedServices.length > 0 && (
-        <motion.div
-          initial={{ y: 100 }}
-          animate={{ y: 0 }}
-          className="fixed bottom-0 left-0 right-0 p-4 glass border-t border-border safe-bottom"
+        <Paper
+          elevation={4}
+          sx={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            p: 3,
+            borderTopLeftRadius: 16,
+            borderTopRightRadius: 16,
+            zIndex: 100, // Above bottom nav if present, but ShopDetail usually covers it?
+            // Actually BottomNav is z-index 1000. Wait, ShopDetail covers full screen?
+            // Yes usually sub-pages cover nav or have their own.
+            // But if BottomNav is fixed z-1000, this might be behind it.
+            // I'll adjust z-index to 1200 or assume Detail page shouldn't show global BottomNav?
+            // User flow: Detail page -> Queue.
+            // I'll put zIndex high.
+            zIndex: 1200,
+          }}
         >
-          <div className="max-w-lg mx-auto">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  {selectedServices.length} service(s) • {totalDuration} min
-                </p>
-                <p className="text-xl font-bold text-foreground">
-                  ${totalPrice}
-                </p>
-              </div>
-            </div>
-            <Button variant="gold" size="xl" className="w-full" onClick={handleJoinQueue}>
-              Join Queue
-            </Button>
-          </div>
-        </motion.div>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                {selectedServices.length} service(s) • {totalDuration} min
+              </Typography>
+              <Typography variant="h5" fontWeight="bold">
+                ${totalPrice}
+              </Typography>
+            </Box>
+          </Stack>
+          <Button
+            variant="contained"
+            size="large"
+            fullWidth
+            onClick={handleJoinQueue}
+            sx={{ borderRadius: 3, py: 1.5, fontSize: "1.1rem" }}
+          >
+            Join Queue
+          </Button>
+        </Paper>
       )}
-    </div>
+    </Box>
   );
 }

@@ -1,13 +1,22 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Search, Star, MapPin, Filter } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { BottomNav } from "@/components/layout/BottomNav";
 import { useNavigate } from "react-router-dom";
-import salonInterior from "@/assets/salon-interior.jpg";
+import {
+  Box,
+  Typography,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Card,
+  CardActionArea,
+  Stack,
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import StarIcon from "@mui/icons-material/Star";
+import { BottomNav } from "@/components/layout/BottomNav";
 import barberPortrait from "@/assets/barber-portrait.jpg";
+import salonInterior from "@/assets/salon-interior.jpg";
 
 const shops = [
   {
@@ -61,79 +70,85 @@ export default function ExploreShops() {
   );
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 10 }}>
       {/* Header */}
-      <div className="px-4 pt-12 pb-4">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-2xl font-display font-bold text-foreground">
-            Explore
-          </h1>
-          <p className="text-muted-foreground mt-1">Find nearby salons</p>
-        </motion.div>
+      <Box sx={{ px: 3, pt: 6, pb: 2 }}>
+        <Typography variant="h4" fontWeight="bold">
+          Explore
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          Find nearby salons
+        </Typography>
+      </Box>
 
-        {/* Search */}
-        <div className="mt-4 flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              placeholder="Find a salon, specialists..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12"
-            />
-          </div>
-          <Button variant="dark" size="icon" className="shrink-0">
-            <Filter className="h-5 w-5" />
-          </Button>
-        </div>
-      </div>
+      {/* Search */}
+      <Box sx={{ px: 3, mt: 1, display: "flex", gap: 1 }}>
+        <TextField
+          fullWidth
+          placeholder="Find a salon, specialists..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon color="action" />
+              </InputAdornment>
+            ),
+            sx: { borderRadius: 4, bgcolor: "background.paper" }
+          }}
+          variant="outlined"
+          size="small"
+        />
+        <IconButton sx={{ bgcolor: "background.paper", borderRadius: 2 }}>
+          <FilterListIcon />
+        </IconButton>
+      </Box>
 
       {/* Shops List */}
-      <div className="px-4 space-y-3">
-        {filteredShops.map((shop, index) => (
-          <motion.div
-            key={shop.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.1 }}
-          >
-            <Card
-              variant="interactive"
-              className="flex gap-4 p-3"
+      <Stack spacing={2} sx={{ px: 3, mt: 3 }}>
+        {filteredShops.map((shop) => (
+          <Card key={shop.id} sx={{ borderRadius: 3 }}>
+            <CardActionArea
               onClick={() => navigate(`/customer/shop/${shop.id}`)}
+              sx={{ display: "flex", justifyContent: "flex-start", alignItems: "flex-start", p: 1.5 }}
             >
-              <div className="w-24 h-24 rounded-xl overflow-hidden shrink-0">
-                <img
-                  src={shop.image}
-                  alt={shop.name}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-foreground">{shop.name}</h3>
-                <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                  <MapPin className="h-3 w-3" />
-                  <span className="truncate">{shop.address}</span>
-                </div>
-                <div className="flex items-center gap-3 mt-2">
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 text-primary fill-primary" />
-                    <span className="text-sm text-foreground">{shop.rating}</span>
-                  </div>
-                  <span className="text-sm text-muted-foreground">•</span>
-                  <span className="text-sm text-muted-foreground">{shop.distance}</span>
-                </div>
-              </div>
-            </Card>
-          </motion.div>
+              <Box
+                component="img"
+                src={shop.image}
+                alt={shop.name}
+                sx={{ width: 90, height: 90, borderRadius: 2, objectFit: "cover" }}
+              />
+              <Box sx={{ ml: 2, flex: 1 }}>
+                <Typography variant="subtitle1" fontWeight="bold">{shop.name}</Typography>
+                <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 0.5, mb: 1 }}>
+                  <LocationOnIcon sx={{ fontSize: 14, color: "text.secondary" }} />
+                  <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: 200 }}>
+                    {shop.address}
+                  </Typography>
+                </Stack>
+
+                <Stack direction="row" alignItems="center" spacing={2}>
+                  <Stack direction="row" alignItems="center" spacing={0.5}>
+                    <StarIcon sx={{ fontSize: 14, color: "primary.main" }} />
+                    <Typography variant="caption" fontWeight="bold">
+                      {shop.rating}
+                    </Typography>
+                  </Stack>
+                  <Typography variant="caption" color="text.secondary">•</Typography>
+                  <Typography variant="caption" color="text.secondary">{shop.distance}</Typography>
+                </Stack>
+              </Box>
+            </CardActionArea>
+          </Card>
         ))}
-      </div>
+        {filteredShops.length === 0 && (
+          <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 4 }}>
+            No shops found matching "{searchQuery}"
+          </Typography>
+        )}
+      </Stack>
 
       <BottomNav />
-    </div>
+    </Box>
   );
 }

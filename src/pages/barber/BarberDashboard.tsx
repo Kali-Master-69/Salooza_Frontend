@@ -1,20 +1,26 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { 
-  Users, 
-  Clock, 
-  Plus, 
-  Pause, 
-  Play, 
-  ChevronRight,
-  Scissors,
-  Timer
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Button,
+  IconButton,
+  Stack,
+  Chip,
+  alpha,
+  Grid,
+} from "@mui/material";
+import GroupIcon from "@mui/icons-material/Group";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import PauseIcon from "@mui/icons-material/Pause";
+import AddIcon from "@mui/icons-material/Add";
+import ContentCutIcon from "@mui/icons-material/ContentCut";
+import TimerIcon from "@mui/icons-material/Timer";
+
 import { BottomNav } from "@/components/layout/BottomNav";
-import { cn } from "@/lib/utils";
 
 interface QueueCustomer {
   id: string;
@@ -77,215 +83,220 @@ export default function BarberDashboard() {
     );
   };
 
+  const activeQueue = queue.filter((c) => c.status !== "completed");
+
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 12 }}>
       {/* Header */}
-      <div className="px-4 pt-12 pb-6">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-2xl font-display font-bold text-foreground">
-            Barber Dashboard
-          </h1>
-          <p className="text-muted-foreground mt-1">Manage your queue</p>
-        </motion.div>
-      </div>
+      <Box sx={{ px: 3, pt: 6, pb: 4 }}>
+        <Typography variant="h4" fontWeight="bold">
+          Barber Dashboard
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          Manage your queue
+        </Typography>
+      </Box>
 
       {/* Stats */}
-      <div className="px-4 mb-6">
-        <div className="grid grid-cols-2 gap-3">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-          >
-            <Card className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    {queue.filter((c) => c.status !== "completed").length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">In Queue</p>
-                </div>
-              </div>
+      <Box sx={{ px: 3, mb: 4 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <Card sx={{ borderRadius: 3 }}>
+              <CardContent sx={{ p: 2 }}>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 2,
+                      bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                      color: "primary.main",
+                      display: "flex",
+                    }}
+                  >
+                    <GroupIcon />
+                  </Box>
+                  <Box>
+                    <Typography variant="h5" fontWeight="bold">
+                      {activeQueue.length}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">In Queue</Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
             </Card>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-          >
-            <Card className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Clock className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    {totalWaitTime} min
-                  </p>
-                  <p className="text-sm text-muted-foreground">Total Wait</p>
-                </div>
-              </div>
+          </Grid>
+          <Grid item xs={6}>
+            <Card sx={{ borderRadius: 3 }}>
+              <CardContent sx={{ p: 2 }}>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 2,
+                      bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                      color: "primary.main",
+                      display: "flex",
+                    }}
+                  >
+                    <AccessTimeIcon />
+                  </Box>
+                  <Box>
+                    <Typography variant="h5" fontWeight="bold">
+                      {totalWaitTime} <Typography component="span" variant="caption">min</Typography>
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">Total Wait</Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
             </Card>
-          </motion.div>
-        </div>
-      </div>
+          </Grid>
+        </Grid>
+      </Box>
 
       {/* Queue Controls */}
-      <div className="px-4 mb-6">
-        <div className="flex gap-3">
+      <Box sx={{ px: 3, mb: 4 }}>
+        <Stack direction="row" spacing={2}>
           <Button
-            variant={isQueueActive ? "destructive" : "gold"}
-            size="lg"
-            className="flex-1"
+            variant="contained"
+            color={isQueueActive ? "error" : "primary"}
+            size="large"
+            startIcon={isQueueActive ? <PauseIcon /> : <PlayArrowIcon />}
+            fullWidth
             onClick={() => setIsQueueActive(!isQueueActive)}
+            sx={{ borderRadius: 3, py: 1.5 }}
           >
-            {isQueueActive ? (
-              <>
-                <Pause className="h-5 w-5 mr-2" /> Pause Queue
-              </>
-            ) : (
-              <>
-                <Play className="h-5 w-5 mr-2" /> Start Queue
-              </>
-            )}
+            {isQueueActive ? "Pause Queue" : "Start Queue"}
           </Button>
           <Button
-            variant="gold-outline"
-            size="lg"
+            variant="outlined"
+            size="large"
             onClick={() => navigate("/barber/add-walkin")}
+            sx={{ borderRadius: 3, minWidth: 64, borderColor: "divider" }}
           >
-            <Plus className="h-5 w-5" />
+            <AddIcon />
           </Button>
-        </div>
-      </div>
+        </Stack>
+      </Box>
 
-      {/* Queue Status */}
-      <div className="px-4 mb-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-foreground">Live Queue</h2>
-          <span
-            className={cn(
-              "px-3 py-1 rounded-full text-xs font-medium",
-              isQueueActive
-                ? "bg-green-500/20 text-green-400"
-                : "bg-destructive/20 text-destructive"
-            )}
-          >
-            {isQueueActive ? "Active" : "Paused"}
-          </span>
-        </div>
-      </div>
+      {/* Queue Status Header */}
+      <Box sx={{ px: 3, mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Typography variant="h6" fontWeight="bold">Live Queue</Typography>
+        <Chip
+          label={isQueueActive ? "Active" : "Paused"}
+          color={isQueueActive ? "success" : "error"} // Use success/error for better distinction
+          variant="outlined" // Or filled with alpha bg
+          size="small"
+          sx={{
+            fontWeight: "bold",
+            bgcolor: (theme) => alpha(theme.palette[isQueueActive ? "success" : "error"].main, 0.1),
+            borderColor: "transparent",
+            color: isQueueActive ? "success.main" : "error.main",
+          }}
+        />
+      </Box>
 
       {/* Queue List */}
-      <div className="px-4 space-y-3">
-        {queue
-          .filter((c) => c.status !== "completed")
-          .map((customer, index) => (
-            <motion.div
-              key={customer.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-            >
-              <Card
-                className={cn(
-                  "p-4",
-                  customer.status === "in-progress" &&
-                    "border-primary bg-primary/5"
-                )}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4">
-                    {/* Position */}
-                    <div
-                      className={cn(
-                        "h-10 w-10 rounded-full flex items-center justify-center font-bold",
-                        customer.status === "in-progress"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground"
-                      )}
-                    >
-                      {customer.position}
-                    </div>
-
-                    <div>
-                      <h3 className="font-semibold text-foreground">
-                        {customer.name}
-                      </h3>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {customer.services.map((service) => (
-                          <span
-                            key={service}
-                            className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground"
-                          >
-                            {service}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                        <Timer className="h-4 w-4" />
-                        {customer.estimatedTime} min
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div>
-                    {customer.status === "waiting" ? (
-                      <Button
-                        variant="gold"
-                        size="sm"
-                        onClick={() => handleStartCustomer(customer.id)}
-                      >
-                        Start
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleCompleteCustomer(customer.id)}
-                      >
-                        Done
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                {customer.status === "in-progress" && (
-                  <div className="mt-4 pt-4 border-t border-border">
-                    <div className="flex items-center gap-2 text-primary">
-                      <Scissors className="h-4 w-4 animate-pulse" />
-                      <span className="text-sm font-medium">In Progress</span>
-                    </div>
-                  </div>
-                )}
-              </Card>
-            </motion.div>
-          ))}
-      </div>
-
-      {queue.filter((c) => c.status !== "completed").length === 0 && (
-        <div className="px-4 py-12 text-center">
-          <p className="text-muted-foreground">No customers in queue</p>
-          <Button
-            variant="gold"
-            className="mt-4"
-            onClick={() => navigate("/barber/add-walkin")}
+      <Stack spacing={2} sx={{ px: 3 }}>
+        {activeQueue.map((customer) => (
+          <Card
+            key={customer.id}
+            sx={{
+              borderRadius: 3,
+              border: 1,
+              borderColor: customer.status === "in-progress" ? "primary.main" : "divider",
+              bgcolor: customer.status === "in-progress" ? (theme) => alpha(theme.palette.primary.main, 0.05) : "background.paper",
+            }}
           >
-            <Plus className="h-5 w-5 mr-2" /> Add Walk-in Customer
-          </Button>
-        </div>
-      )}
+            <CardContent sx={{ p: 2 }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                <Stack direction="row" spacing={2}>
+                  {/* Position */}
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: "50%",
+                      bgcolor: customer.status === "in-progress" ? "primary.main" : "action.hover",
+                      color: customer.status === "in-progress" ? "primary.contrastText" : "text.secondary",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: "bold",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {customer.position}
+                  </Box>
+
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight="bold">{customer.name}</Typography>
+                    <Stack direction="row" spacing={1} sx={{ mt: 0.5, flexWrap: "wrap", gap: 0.5 }}>
+                      {customer.services.map((service) => (
+                        <Chip
+                          key={service}
+                          label={service}
+                          size="small"
+                          sx={{ height: 20, fontSize: "0.7rem" }}
+                        />
+                      ))}
+                    </Stack>
+                    <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mt: 1 }}>
+                      <TimerIcon fontSize="small" color="action" sx={{ fontSize: 16 }} />
+                      <Typography variant="caption" color="text.secondary">
+                        {customer.estimatedTime} min
+                      </Typography>
+                    </Stack>
+                  </Box>
+                </Stack>
+
+                <Box>
+                  {customer.status === "waiting" ? (
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => handleStartCustomer(customer.id)}
+                    >
+                      Start
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => handleCompleteCustomer(customer.id)}
+                    >
+                      Done
+                    </Button>
+                  )}
+                </Box>
+              </Stack>
+
+              {customer.status === "in-progress" && (
+                <Box sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: "divider", display: "flex", alignItems: "center", gap: 1, color: "primary.main" }}>
+                  <ContentCutIcon fontSize="small" />
+                  <Typography variant="caption" fontWeight="bold" textTransform="uppercase">
+                    In Progress
+                  </Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+
+        {activeQueue.length === 0 && (
+          <Box sx={{ textAlign: "center", py: 4 }}>
+            <Typography color="text.secondary">No customers in queue</Typography>
+            <Button
+              startIcon={<AddIcon />}
+              sx={{ mt: 2 }}
+              onClick={() => navigate("/barber/add-walkin")}
+            >
+              Add Walk-in
+            </Button>
+          </Box>
+        )}
+      </Stack>
 
       <BottomNav />
-    </div>
+    </Box>
   );
 }

@@ -1,9 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowLeft, Mail, Lock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Container,
+  IconButton,
+  InputAdornment,
+  alpha,
+} from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EmailIcon from "@mui/icons-material/Email";
+import LockIcon from "@mui/icons-material/Lock";
 
 export default function ForgotPasswordScreen() {
   const navigate = useNavigate();
@@ -17,90 +26,103 @@ export default function ForgotPasswordScreen() {
 
   if (step === "sent") {
     return (
-      <div className="min-h-screen w-full bg-background p-6 flex flex-col items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="text-center max-w-sm"
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "background.default",
+          p: 3,
+          textAlign: "center",
+        }}
+      >
+        <Box
+          sx={{
+            mb: 4,
+            width: 80,
+            height: 80,
+            borderRadius: 4,
+            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "primary.main",
+          }}
         >
-          {/* Icon */}
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10">
-            <Lock className="h-10 w-10 text-primary" />
-          </div>
+          <LockIcon fontSize="large" />
+        </Box>
 
-          {/* Content */}
-          <h1 className="font-display text-2xl font-bold text-foreground">
-            Code has been sent to reset a new password
-          </h1>
-          <p className="mt-4 text-muted-foreground">
-            You'll shortly receive an email with a code to setup a new password.
-          </p>
+        <Typography variant="h5" fontWeight="bold" gutterBottom>
+          Code has been sent to reset a new password
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 350, mb: 4 }}>
+          You'll shortly receive an email with a code to setup a new password.
+        </Typography>
 
-          {/* Button */}
-          <Button
-            variant="gold"
-            size="xl"
-            className="mt-8 w-full"
-            onClick={() => navigate("/otp-verify")}
-          >
-            Done
-          </Button>
-        </motion.div>
-      </div>
+        <Button
+          variant="contained"
+          size="large"
+          fullWidth
+          sx={{ maxWidth: 350, borderRadius: 3, py: 1.5 }}
+          onClick={() => navigate("/otp-verify")}
+        >
+          Done
+        </Button>
+      </Box>
     );
   }
 
   return (
-    <div className="min-h-screen w-full bg-background p-6 pt-16">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        {/* Back Button */}
-        <button
-          onClick={() => navigate(-1)}
-          className="mb-8 flex items-center gap-2 text-muted-foreground"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", py: 4 }}>
+      <Container maxWidth="xs">
+        <IconButton onClick={() => navigate(-1)} sx={{ mb: 4 }}>
+          <ArrowBackIcon />
+        </IconButton>
 
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="font-display text-3xl font-bold text-foreground">
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h4" fontWeight="bold" gutterBottom>
             Forgot Password
-          </h1>
-          <p className="mt-2 text-muted-foreground">
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
             Please enter your email address. You will receive a code to reset a
             new password via email.
-          </p>
-        </div>
+          </Typography>
+        </Box>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="mb-2 block text-sm text-muted-foreground">
-              Via email address
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-12"
-                required
-              />
-            </div>
-          </div>
+        <form onSubmit={handleSubmit}>
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: "block" }}>
+            Via email address
+          </Typography>
+          <TextField
+            fullWidth
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <EmailIcon color="action" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ mb: 4 }}
+          />
 
-          <Button type="submit" variant="gold" size="xl" className="w-full">
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            fullWidth
+            sx={{ borderRadius: 3, py: 1.5 }}
+          >
             Reset Password
           </Button>
         </form>
-      </motion.div>
-    </div>
+      </Container>
+    </Box>
   );
 }

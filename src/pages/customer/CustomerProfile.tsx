@@ -1,16 +1,37 @@
-import { motion } from "framer-motion";
-import { User, Mail, Phone, Settings, LogOut, ChevronRight, Edit2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import {
+  Box,
+  Typography,
+  Card,
+  CardActionArea,
+  Button,
+  Avatar,
+  Stack,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  alpha,
+  Divider,
+} from "@mui/material";
+import PersonIcon from "@mui/icons-material/Person";
+import EmailIcon from "@mui/icons-material/Email";
+import PhoneIcon from "@mui/icons-material/Phone";
+import SettingsIcon from "@mui/icons-material/Settings";
+import SupportIcon from "@mui/icons-material/HelpOutline";
+import LogoutIcon from "@mui/icons-material/Logout";
+import EditIcon from "@mui/icons-material/Edit";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 import barberPortrait from "@/assets/barber-portrait.jpg";
 
 const menuItems = [
-  { icon: User, label: "Edit Profile", path: "/customer/profile/edit" },
-  { icon: Settings, label: "Settings", path: "/customer/settings" },
-  { icon: Mail, label: "Support", path: "/customer/support" },
+  { icon: <PersonIcon />, label: "Edit Profile", path: "/customer/profile/edit" },
+  { icon: <SettingsIcon />, label: "Settings", path: "/customer/settings" },
+  { icon: <SupportIcon />, label: "Support", path: "/customer/support" },
 ];
 
 export default function CustomerProfile() {
@@ -23,114 +44,126 @@ export default function CustomerProfile() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 12 }}>
       {/* Header */}
-      <div className="px-4 pt-12 pb-6">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-2xl font-display font-bold text-foreground">
-            Profile
-          </h1>
-        </motion.div>
-      </div>
+      <Box sx={{ px: 3, pt: 6, pb: 4 }}>
+        <Typography variant="h4" fontWeight="bold">
+          Profile
+        </Typography>
+      </Box>
 
       {/* Profile Card */}
-      <div className="px-4 mb-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          <Card className="p-6 relative">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="absolute top-4 right-4"
+      <Box sx={{ px: 3, mb: 4 }}>
+        <Card sx={{ borderRadius: 3, position: "relative", overflow: "visible" }}>
+          <IconButton
+            size="small"
+            sx={{ position: "absolute", top: 8, right: 8 }}
+          >
+            <EditIcon fontSize="small" />
+          </IconButton>
+          <Box sx={{ p: 4, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+            <Box
+              sx={{
+                p: 0.5,
+                bgcolor: "background.paper",
+                borderRadius: "50%",
+                border: 1,
+                borderColor: "primary.main",
+                mb: 2,
+              }}
             >
-              <Edit2 className="h-4 w-4" />
-            </Button>
-            <div className="flex flex-col items-center text-center">
-              <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-primary/30 mb-4">
-                <img
-                  src={barberPortrait}
-                  alt="Profile"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <h2 className="text-xl font-semibold text-foreground">
-                {user?.name || "John Doe"}
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                {user?.email || "john@example.com"}
-              </p>
-              <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                <Phone className="h-4 w-4" />
-                {user?.phone || "+1 234 567 890"}
-              </div>
-              <div className="mt-4 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium capitalize">
-                {user?.role || "Customer"}
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-      </div>
+              <Avatar
+                src={barberPortrait}
+                alt="Profile"
+                sx={{ width: 96, height: 96 }}
+              />
+            </Box>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              {user?.name || "John Doe"}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {user?.email || "john@example.com"}
+            </Typography>
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 1, color: "text.secondary" }}>
+              <PhoneIcon fontSize="small" />
+              <Typography variant="caption">{user?.phone || "+1 234 567 890"}</Typography>
+            </Stack>
+            <Box
+              sx={{
+                mt: 2,
+                px: 2,
+                py: 0.75,
+                borderRadius: 4,
+                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                color: "primary.main",
+                typography: "caption",
+                fontWeight: "bold",
+                textTransform: "capitalize",
+              }}
+            >
+              {user?.role || "Customer"}
+            </Box>
+          </Box>
+        </Card>
+      </Box>
 
       {/* Menu */}
-      <div className="px-4 space-y-3">
-        {menuItems.map((item, index) => (
-          <motion.div
-            key={item.label}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
-          >
-            <Card
-              variant="interactive"
-              className="p-4"
-              onClick={() => navigate(item.path)}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center">
-                    <item.icon className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <span className="font-medium text-foreground">
-                    {item.label}
-                  </span>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </div>
-            </Card>
-          </motion.div>
-        ))}
+      <Box sx={{ px: 3 }}>
+        <Card sx={{ borderRadius: 3, overflow: "hidden" }}>
+          <List disablePadding>
+            {menuItems.map((item, index) => (
+              <Box key={item.label}>
+                <ListItem disablePadding>
+                  <ListItemButton onClick={() => navigate(item.path)} sx={{ py: 2 }}>
+                    <ListItemIcon sx={{ minWidth: 40, color: "action.active" }}>
+                      <Box
+                        sx={{
+                          p: 1,
+                          borderRadius: 2,
+                          bgcolor: "action.hover",
+                          display: "flex",
+                        }}
+                      >
+                        {item.icon}
+                      </Box>
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={item.label}
+                      primaryTypographyProps={{ fontWeight: "medium" }}
+                    />
+                    <ChevronRightIcon color="action" />
+                  </ListItemButton>
+                </ListItem>
+                {index < menuItems.length - 1 && <Divider component="li" variant="inset" />}
+              </Box>
+            ))}
+          </List>
+        </Card>
 
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3, delay: 0.4 }}
-        >
-          <Card
-            variant="interactive"
-            className="p-4"
-            onClick={handleLogout}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-xl bg-destructive/10 flex items-center justify-center">
-                  <LogOut className="h-5 w-5 text-destructive" />
-                </div>
-                <span className="font-medium text-destructive">Logout</span>
-              </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </div>
-          </Card>
-        </motion.div>
-      </div>
+        <Card sx={{ mt: 3, borderRadius: 3, overflow: "hidden" }}>
+          <ListItemButton onClick={handleLogout} sx={{ py: 2 }}>
+            <ListItemIcon sx={{ minWidth: 40, color: "error.main" }}>
+              <Box
+                sx={{
+                  p: 1,
+                  borderRadius: 2,
+                  bgcolor: (theme) => alpha(theme.palette.error.main, 0.1),
+                  display: "flex",
+                }}
+              >
+                <LogoutIcon color="error" />
+              </Box>
+            </ListItemIcon>
+            <ListItemText
+              primary="Logout"
+              primaryTypographyProps={{ fontWeight: "medium", color: "error.main" }}
+            />
+            <ChevronRightIcon color="action" />
+          </ListItemButton>
+        </Card>
+      </Box>
 
       <BottomNav />
-    </div>
+    </Box>
   );
 }

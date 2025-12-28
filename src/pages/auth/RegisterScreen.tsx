@@ -1,38 +1,27 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Eye, EyeOff, User, Scissors, Shield } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Box,
+  Button,
+  Container,
+  TextField,
+  Typography,
+  IconButton,
+  InputAdornment,
+  Link,
+  Stack,
+  alpha,
+} from "@mui/material";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
-import { cn } from "@/lib/utils";
-
-const roles: { id: UserRole; label: string; icon: typeof User; description: string }[] = [
-  {
-    id: "customer",
-    label: "Customer",
-    icon: User,
-    description: "Book appointments",
-  },
-  {
-    id: "barber",
-    label: "Barber",
-    icon: Scissors,
-    description: "Manage your shop",
-  },
-  {
-    id: "admin",
-    label: "Admin",
-    icon: Shield,
-    description: "Full system access",
-  },
-];
 
 export default function RegisterScreen() {
   const navigate = useNavigate();
-  const { register } = useAuth();
-  const [step, setStep] = useState<"role" | "details">("role");
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [searchParams] = useSearchParams();
+  const { register, selectRole, selectedRole } = useAuth();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -43,39 +32,39 @@ export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleRoleSelect = (role: UserRole) => {
-    setSelectedRole(role);
-  };
-
-  const handleContinue = () => {
-    if (selectedRole) {
-      setStep("details");
+  // Ensure role is selected
+  useEffect(() => {
+    const roleParam = searchParams.get("role") as UserRole;
+    if (roleParam) {
+      selectRole(roleParam);
+    } else if (!selectedRole) {
+      navigate("/role-select?mode=register");
     }
-  };
+  }, [searchParams, selectedRole, selectRole, navigate]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedRole) return;
 
+    // Basic validation
+    if (formData.password !== formData.confirmPassword) {
+      // Show error - ideally use a Snackbar, but checking passwords here
+      alert("Passwords do not match");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await register({
+      const success = await register({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
       });
 
-      // Navigate to respective dashboard based on role
-      switch (selectedRole) {
-        case "barber":
-          navigate("/barber");
-          break;
-        case "admin":
-          navigate("/admin");
-          break;
-        default:
-          navigate("/customer");
+      if (success) {
+        // Navigate to respective dashboard based on role
+        navigate(selectedRole === "barber" ? "/barber" : selectedRole === "admin" ? "/admin" : "/customer");
       }
     } catch (error) {
       console.error("Registration failed:", error);
@@ -84,233 +73,126 @@ export default function RegisterScreen() {
     }
   };
 
-  if (step === "role") {
-    return (
-      <div className="min-h-screen w-full bg-background p-6 pt-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="font-display text-3xl font-bold text-foreground">
-              Join Stylize
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Select your role to get started
-            </p>
-          </div>
-
-          {/* Role Selection */}
-          <div className="space-y-4">
-            {roles.map((role) => (
-              <button
-                key={role.id}
-                onClick={() => handleRoleSelect(role.id)}
-                className={cn(
-                  "w-full rounded-2xl border-2 p-5 text-left transition-all duration-300",
-                  selectedRole === role.id
-                    ? "border-primary bg-primary/10"
-                    : "border-border bg-card hover:border-primary/50"
-                )}
-              >
-                <div className="flex items-center gap-4">
-                  <div
-                    className={cn(
-                      "flex h-14 w-14 items-center justify-center rounded-xl transition-colors",
-                      selectedRole === role.id
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground"
-                    )}
-                  >
-                    <role.icon className="h-7 w-7" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground">
-                      {role.label}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {role.description}
-                    </p>
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {/* Continue Button */}
-          <Button
-            variant="gold"
-            size="xl"
-            className="mt-8 w-full"
-            onClick={handleContinue}
-            disabled={!selectedRole}
-          >
-            Continue
-          </Button>
-
-          {/* Login Link */}
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <button
-              onClick={() => navigate("/login")}
-              className="text-primary font-medium"
-            >
-              Sign In
-            </button>
-          </p>
-        </motion.div>
-      </div>
-    );
-  }
+  if (!selectedRole) return null;
 
   return (
-    <div className="min-h-screen w-full bg-background p-6 pt-16">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        {/* Back Button */}
-        <button
-          onClick={() => setStep("role")}
-          className="mb-6 text-muted-foreground"
-        >
-          ← Back
-        </button>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        bgcolor: "background.default",
+        py: 4,
+        display: "flex",
+        alignItems: "center",
+      }}
+    >
+      <Container maxWidth="sm">
+        <IconButton onClick={() => navigate("/role-select")} sx={{ mb: 2 }}>
+          <ArrowBackIcon />
+        </IconButton>
 
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="font-display text-3xl font-bold text-foreground">
+        <Box sx={{ mb: 4, textAlign: "center" }}>
+          <Typography variant="h4" fontWeight="bold" gutterBottom>
             Create an Account
-          </h1>
-          <p className="mt-2 text-muted-foreground">
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
             Registering as{" "}
-            <span className="text-primary font-medium capitalize">
+            <Typography component="span" color="primary" sx={{ textTransform: "capitalize", fontWeight: "bold" }}>
               {selectedRole}
-            </span>
-          </p>
-        </div>
+            </Typography>
+          </Typography>
+        </Box>
 
-        {/* Form */}
-        <form onSubmit={handleRegister} className="space-y-4">
-          <div>
-            <label className="mb-2 block text-sm text-muted-foreground">
-              Full Name
-            </label>
-            <Input
-              type="text"
-              placeholder="Enter your name"
+        <form onSubmit={handleRegister}>
+          <Stack spacing={3}>
+            <TextField
+              label="Full Name"
+              fullWidth
+              required
               value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              required
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm text-muted-foreground">
-              Email Address
-            </label>
-            <Input
+            <TextField
+              label="Email Address"
               type="email"
-              placeholder="Enter your email"
+              fullWidth
+              required
               value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              required
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm text-muted-foreground">
-              Phone Number
-            </label>
-            <Input
+            <TextField
+              label="Phone Number"
               type="tel"
-              placeholder="Enter your phone number"
+              fullWidth
+              required
               value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
-              required
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             />
-          </div>
 
-          <div>
-            <label className="mb-2 block text-sm text-muted-foreground">
-              Password
-            </label>
-            <div className="relative">
-              <Input
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField
+                label="Password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Create a password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
+                fullWidth
                 required
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
-              <button
+              <TextField
+                label="Confirm Password"
+                type="password"
+                fullWidth
+                required
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+              />
+            </Stack>
+
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              fullWidth
+              disabled={isLoading}
+              sx={{ py: 1.5 }}
+            >
+              {isLoading ? "Creating Account..." : "Sign Up"}
+            </Button>
+
+            <Typography variant="caption" align="center" color="text.secondary" display="block">
+              By registering, you agree to the following{" "}
+              <Link href="#" color="primary" underline="hover">
+                Terms & Conditions
+              </Link>{" "}
+              without reservation.
+            </Typography>
+
+            <Typography variant="body2" align="center" color="text.secondary">
+              Already have an account?{" "}
+              <Link
+                component="button"
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                onClick={() => navigate(`/login?role=${selectedRole}`)}
+                fontWeight="bold"
+                underline="hover"
               >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5" />
-                ) : (
-                  <Eye className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm text-muted-foreground">
-              Confirm Password
-            </label>
-            <Input
-              type="password"
-              placeholder="Confirm your password"
-              value={formData.confirmPassword}
-              onChange={(e) =>
-                setFormData({ ...formData, confirmPassword: e.target.value })
-              }
-              required
-            />
-          </div>
-
-          <Button
-            type="submit"
-            variant="gold"
-            size="xl"
-            className="w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? "Creating Account..." : "Sign Up"}
-          </Button>
-
-          <p className="text-center text-xs text-muted-foreground">
-            By registering, you agree to the following{" "}
-            <span className="text-primary">Terms & Conditions</span> without
-            reservation.
-          </p>
+                Sign In
+              </Link>
+            </Typography>
+          </Stack>
         </form>
-
-        {/* Login Link */}
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <button
-            onClick={() => navigate("/login")}
-            className="text-primary font-medium"
-          >
-            Sign In
-          </button>
-        </p>
-      </motion.div>
-    </div>
+      </Container>
+    </Box>
   );
 }

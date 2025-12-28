@@ -1,10 +1,25 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Search, MapPin, Star, ChevronRight, Filter } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import {
+  Box,
+  Typography,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Button,
+  Card,
+  CardContent,
+  CardActionArea,
+  Avatar,
+  Stack,
+  alpha,
+  Container,
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import StarIcon from "@mui/icons-material/Star";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { BottomNav } from "@/components/layout/BottomNav";
 import barberPortrait from "@/assets/barber-portrait.jpg";
 import salonInterior from "@/assets/salon-interior.jpg";
@@ -45,204 +60,226 @@ export default function CustomerHome() {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 10 }}>
       {/* Header */}
-      <div className="px-4 pt-12 pb-4">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <p className="text-muted-foreground text-sm">Hi Jackson,</p>
-          <div className="flex items-center gap-1 text-muted-foreground mt-1">
-            <MapPin className="h-4 w-4 text-primary" />
-            <span className="text-sm">324 Chicago</span>
-          </div>
-        </motion.div>
+      <Box sx={{ px: 3, pt: 6, pb: 2 }}>
+        <Typography variant="body2" color="text.secondary">Hi Jackson,</Typography>
+        <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 0.5 }}>
+          <LocationOnIcon fontSize="small" color="primary" />
+          <Typography variant="body2" color="text.secondary">324 Chicago</Typography>
+        </Stack>
+      </Box>
 
-        {/* Search */}
-        <div className="mt-4 flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              placeholder="Find a salon, specialists..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12"
-            />
-          </div>
-          <Button variant="dark" size="icon" className="shrink-0">
-            <Filter className="h-5 w-5" />
-          </Button>
-        </div>
-      </div>
+      {/* Search */}
+      <Box sx={{ px: 3, mt: 1, display: "flex", gap: 1 }}>
+        <TextField
+          fullWidth
+          placeholder="Find a salon, specialists..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon color="action" />
+              </InputAdornment>
+            ),
+            sx: { borderRadius: 4, bgcolor: "background.paper" }
+          }}
+          variant="outlined"
+          size="small"
+        />
+        <IconButton sx={{ bgcolor: "background.paper", borderRadius: 2 }}>
+          <FilterListIcon />
+        </IconButton>
+      </Box>
 
       {/* Promo Banner */}
-      <div className="px-4 mb-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+      <Box sx={{ px: 3, mt: 3 }}>
+        <Card
+          sx={{
+            background: (theme) =>
+              `linear-gradient(to right, ${alpha(theme.palette.primary.main, 0.2)}, ${alpha(
+                theme.palette.primary.main,
+                0.05
+              )})`,
+            position: "relative",
+            overflow: "hidden",
+            borderRadius: 3,
+          }}
         >
-          <Card className="bg-gradient-to-r from-primary/20 to-primary/5 p-4 overflow-hidden relative">
-            <div className="relative z-10">
-              <p className="text-xl font-semibold text-foreground">
-                30% Off On
-              </p>
-              <p className="text-lg text-foreground">Facial Treatments</p>
-              <Button variant="gold" size="sm" className="mt-3">
-                Explore
-              </Button>
-            </div>
-          </Card>
-        </motion.div>
-      </div>
+          <CardContent>
+            <Typography variant="h6" fontWeight="bold">30% Off On</Typography>
+            <Typography variant="body1">Facial Treatments</Typography>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ mt: 2, borderRadius: 2 }}
+            >
+              Explore
+            </Button>
+          </CardContent>
+        </Card>
+      </Box>
 
       {/* Nearest To You */}
-      <div className="px-4 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Nearest To You</h2>
-          <button className="text-sm text-primary flex items-center gap-1">
-            See all <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-          {featuredShops.map((shop, index) => (
-            <motion.div
+      <Box sx={{ mt: 4 }}>
+        <Box sx={{ px: 3, display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+          <Typography variant="subtitle1" fontWeight="bold">Nearest To You</Typography>
+          <Button endIcon={<ChevronRightIcon />} size="small" color="primary">See all</Button>
+        </Box>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            overflowX: "auto",
+            px: 3,
+            pb: 2,
+            "&::-webkit-scrollbar": { display: "none" },
+            scrollbarWidth: "none",
+          }}
+        >
+          {featuredShops.map((shop) => (
+            <Card
               key={shop.id}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
+              sx={{ minWidth: 200, borderRadius: 3, flexShrink: 0 }}
             >
-              <Card
-                variant="interactive"
-                className="w-40 shrink-0 overflow-hidden"
-                onClick={() => navigate(`/customer/shop/${shop.id}`)}
-              >
-                <div className="h-24 overflow-hidden">
-                  <img
+              <CardActionArea onClick={() => navigate(`/customer/shop/${shop.id}`)}>
+                <Box sx={{ height: 120, width: "100%" }}>
+                  <Box
+                    component="img"
                     src={shop.image}
                     alt={shop.name}
-                    className="h-full w-full object-cover"
+                    sx={{ height: "100%", width: "100%", objectFit: "cover" }}
                   />
-                </div>
-                <div className="p-3">
-                  <h3 className="text-sm font-semibold text-foreground truncate">
-                    {shop.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground truncate mt-1">
+                </Box>
+                <CardContent sx={{ p: 2 }}>
+                  <Typography variant="subtitle2" noWrap>{shop.name}</Typography>
+                  <Typography variant="caption" color="text.secondary" display="block" noWrap>
                     {shop.address}
-                  </p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <div className="flex items-center gap-1">
-                      <Star className="h-3 w-3 text-primary fill-primary" />
-                      <span className="text-xs text-foreground">{shop.rating}</span>
-                    </div>
-                    <span className="text-xs text-muted-foreground">•</span>
-                    <span className="text-xs text-muted-foreground">{shop.distance}</span>
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Popular Experts */}
-      <div className="px-4 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Popular Experts</h2>
-          <button className="text-sm text-primary flex items-center gap-1">
-            See all <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-          {popularBarbers.map((barber, index) => (
-            <motion.div
-              key={barber.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="flex flex-col items-center"
-            >
-              <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-primary/30">
-                <img
-                  src={barber.image}
-                  alt={barber.name}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <p className="text-sm font-medium text-foreground mt-2">{barber.name}</p>
-              <p className="text-xs text-muted-foreground">{barber.specialty}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Categories */}
-      <div className="px-4 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Categories</h2>
-          <button className="text-sm text-primary flex items-center gap-1">
-            See all <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-          {categories.map((cat) => (
-            <Card key={cat.id} variant="interactive" className="px-4 py-3 shrink-0">
-              <p className="text-sm font-medium text-foreground">{cat.name}</p>
-              <p className="text-xs text-muted-foreground">{cat.count} Places</p>
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 1 }}>
+                    <Stack direction="row" alignItems="center" spacing={0.5}>
+                      <StarIcon sx={{ fontSize: 14, color: "primary.main" }} />
+                      <Typography variant="caption" fontWeight="bold">
+                        {shop.rating}
+                      </Typography>
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary">•</Typography>
+                    <Typography variant="caption" color="text.secondary">{shop.distance}</Typography>
+                  </Stack>
+                </CardContent>
+              </CardActionArea>
             </Card>
           ))}
-        </div>
-      </div>
+        </Stack>
+      </Box>
 
-      {/* Salons Near By */}
-      <div className="px-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Salon Near by</h2>
-          <button className="text-sm text-primary flex items-center gap-1">
-            Map View <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="space-y-3">
-          {featuredShops.map((shop, index) => (
-            <motion.div
-              key={shop.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-            >
-              <Card
-                variant="interactive"
-                className="flex gap-4 p-3"
-                onClick={() => navigate(`/customer/shop/${shop.id}`)}
-              >
-                <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0">
-                  <img
-                    src={shop.image}
-                    alt={shop.name}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground">{shop.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{shop.address}</p>
-                  <div className="flex items-center gap-3 mt-2">
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 text-primary fill-primary" />
-                      <span className="text-sm text-foreground">{shop.rating}</span>
-                    </div>
-                    <span className="text-sm text-muted-foreground">{shop.distance}</span>
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
+      {/* Popular Experts */}
+      <Box sx={{ mt: 3 }}>
+        <Box sx={{ px: 3, display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+          <Typography variant="subtitle1" fontWeight="bold">Popular Experts</Typography>
+          <Button endIcon={<ChevronRightIcon />} size="small" color="primary">See all</Button>
+        </Box>
+        <Stack
+          direction="row"
+          spacing={3}
+          sx={{
+            overflowX: "auto",
+            px: 3,
+            pb: 2,
+            "&::-webkit-scrollbar": { display: "none" },
+            scrollbarWidth: "none",
+          }}
+        >
+          {popularBarbers.map((barber) => (
+            <Box key={barber.id} sx={{ textAlign: "center", minWidth: 70 }}>
+              <Avatar
+                src={barber.image}
+                alt={barber.name}
+                sx={{
+                  width: 64,
+                  height: 64,
+                  mb: 1,
+                  border: 2,
+                  borderColor: (theme) => alpha(theme.palette.primary.main, 0.3),
+                }}
+              />
+              <Typography variant="body2" fontWeight="medium">{barber.name}</Typography>
+              <Typography variant="caption" color="text.secondary">{barber.specialty}</Typography>
+            </Box>
           ))}
-        </div>
-      </div>
+        </Stack>
+      </Box>
+
+      {/* Categories */}
+      <Box sx={{ mt: 3 }}>
+        <Box sx={{ px: 3, display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+          <Typography variant="subtitle1" fontWeight="bold">Categories</Typography>
+          <Button endIcon={<ChevronRightIcon />} size="small" color="primary">See all</Button>
+        </Box>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            overflowX: "auto",
+            px: 3,
+            pb: 2,
+            "&::-webkit-scrollbar": { display: "none" },
+            scrollbarWidth: "none",
+          }}
+        >
+          {categories.map((cat) => (
+            <Card key={cat.id} sx={{ minWidth: 100, borderRadius: 2, flexShrink: 0 }}>
+              <CardActionArea sx={{ p: 2 }}>
+                <Typography variant="body2" fontWeight="bold">{cat.name}</Typography>
+                <Typography variant="caption" color="text.secondary">{cat.count} Places</Typography>
+              </CardActionArea>
+            </Card>
+          ))}
+        </Stack>
+      </Box>
+
+      {/* Salons Near By (Vertical List) */}
+      <Box sx={{ mt: 3, px: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+          <Typography variant="subtitle1" fontWeight="bold">Salon Near by</Typography>
+          <Button endIcon={<ChevronRightIcon />} size="small" color="primary">Map View</Button>
+        </Box>
+        <Stack spacing={2}>
+          {featuredShops.map((shop) => (
+            <Card key={shop.id} sx={{ borderRadius: 3 }}>
+              <CardActionArea
+                onClick={() => navigate(`/customer/shop/${shop.id}`)}
+                sx={{ display: "flex", justifyContent: "flex-start", alignItems: "flex-start", p: 1.5 }}
+              >
+                <Box
+                  component="img"
+                  src={shop.image}
+                  alt={shop.name}
+                  sx={{ width: 80, height: 80, borderRadius: 2, objectFit: "cover" }}
+                />
+                <Box sx={{ ml: 2, flex: 1 }}>
+                  <Typography variant="subtitle2" fontWeight="bold">{shop.name}</Typography>
+                  <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                    {shop.address}
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing={2} sx={{ mt: 0.5 }}>
+                    <Stack direction="row" alignItems="center" spacing={0.5}>
+                      <StarIcon sx={{ fontSize: 14, color: "primary.main" }} />
+                      <Typography variant="caption" fontWeight="bold">
+                        {shop.rating}
+                      </Typography>
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary">{shop.distance}</Typography>
+                  </Stack>
+                </Box>
+              </CardActionArea>
+            </Card>
+          ))}
+        </Stack>
+      </Box>
 
       <BottomNav />
-    </div>
+    </Box>
   );
 }

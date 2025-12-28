@@ -1,13 +1,13 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider, CssBaseline } from "@mui/material";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { muiTheme } from "./theme/muiTheme";
 
 // Auth Pages
 import SplashScreen from "./pages/auth/SplashScreen";
 import WelcomeScreen from "./pages/auth/WelcomeScreen";
+import RoleSelectScreen from "./pages/auth/RoleSelectScreen";
 import LoginScreen from "./pages/auth/LoginScreen";
 import RegisterScreen from "./pages/auth/RegisterScreen";
 import ForgotPasswordScreen from "./pages/auth/ForgotPasswordScreen";
@@ -32,15 +32,15 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
+    <ThemeProvider theme={muiTheme}>
+      <CssBaseline />
+      <AuthProvider>
         <BrowserRouter>
           <Routes>
             {/* Auth Routes */}
             <Route path="/" element={<SplashScreen />} />
             <Route path="/welcome" element={<WelcomeScreen />} />
+            <Route path="/role-select" element={<RoleSelectScreen />} />
             <Route path="/login" element={<LoginScreen />} />
             <Route path="/register" element={<RegisterScreen />} />
             <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
@@ -70,8 +70,8 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

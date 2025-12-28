@@ -1,8 +1,20 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Clock, Users, MapPin, MessageCircle, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Button,
+  Grid,
+  Stack,
+  alpha,
+  Divider,
+} from "@mui/material";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import GroupIcon from "@mui/icons-material/Group";
+import RoomIcon from "@mui/icons-material/Room";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useNavigate } from "react-router-dom";
 
@@ -20,156 +32,192 @@ export default function QueueStatus() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 12 }}>
       {/* Header */}
-      <div className="px-4 pt-12 pb-6">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-2xl font-display font-bold text-foreground">
-            Queue Status
-          </h1>
-          <p className="text-muted-foreground mt-1">Track your position</p>
-        </motion.div>
-      </div>
+      <Box sx={{ px: 3, pt: 6, pb: 4 }}>
+        <Typography variant="h4" fontWeight="bold">
+          Queue Status
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          Track your position
+        </Typography>
+      </Box>
 
       {/* Token Card */}
-      <div className="px-4 mb-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+      <Box sx={{ px: 3, mb: 4 }}>
+        <Card
+          sx={{
+            background: (theme) =>
+              `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.2)} 0%, ${alpha(
+                theme.palette.primary.main,
+                0.05
+              )} 100%)`,
+            borderColor: (theme) => alpha(theme.palette.primary.main, 0.3),
+            borderWidth: 1,
+            borderStyle: "solid",
+            borderRadius: 3,
+            p: 3,
+            textAlign: "center",
+          }}
         >
-          <Card className="p-6 bg-gradient-to-br from-primary/20 to-primary/5 border-primary/30">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-2">Your Token</p>
-              <div className="inline-flex items-center justify-center h-24 w-24 rounded-full bg-primary text-primary-foreground text-4xl font-bold mb-4">
-                #{position}
-              </div>
-              <h2 className="text-xl font-semibold text-foreground">
-                Stylish Barber Shop
-              </h2>
-              <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                127 Nature Lodge
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-      </div>
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            Your Token
+          </Typography>
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 96,
+              height: 96,
+              borderRadius: "50%",
+              bgcolor: "primary.main",
+              color: "primary.contrastText",
+              fontSize: "2.25rem",
+              fontWeight: "bold",
+              mb: 2,
+              boxShadow: (theme) => `0 8px 24px ${alpha(theme.palette.primary.main, 0.4)}`,
+            }}
+          >
+            #{position}
+          </Box>
+          <Typography variant="h5" fontWeight="bold">
+            Stylish Barber Shop
+          </Typography>
+          <Stack direction="row" justifyContent="center" alignItems="center" spacing={0.5} sx={{ mt: 1, color: "text.secondary" }}>
+            <RoomIcon fontSize="small" />
+            <Typography variant="body2">127 Nature Lodge</Typography>
+          </Stack>
+        </Card>
+      </Box>
 
       {/* Wait Info */}
-      <div className="px-4 mb-6">
-        <div className="grid grid-cols-2 gap-3">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-          >
-            <Card className="p-4 text-center">
-              <Clock className="h-8 w-8 text-primary mx-auto mb-2" />
-              <p className="text-2xl font-bold text-foreground">
-                ~{timeRemaining} min
-              </p>
-              <p className="text-sm text-muted-foreground">Estimated Wait</p>
+      <Box sx={{ px: 3, mb: 4 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <Card sx={{ borderRadius: 3, textAlign: "center", p: 2 }}>
+              <AccessTimeIcon fontSize="large" color="primary" sx={{ mb: 1 }} />
+              <Typography variant="h5" fontWeight="bold">
+                ~{timeRemaining} <Typography component="span" variant="caption">min</Typography>
+              </Typography>
+              <Typography variant="caption" color="text.secondary">Estimated Wait</Typography>
             </Card>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-          >
-            <Card className="p-4 text-center">
-              <Users className="h-8 w-8 text-primary mx-auto mb-2" />
-              <p className="text-2xl font-bold text-foreground">
+          </Grid>
+          <Grid item xs={6}>
+            <Card sx={{ borderRadius: 3, textAlign: "center", p: 2 }}>
+              <GroupIcon fontSize="large" color="primary" sx={{ mb: 1 }} />
+              <Typography variant="h5" fontWeight="bold">
                 {position - 1}
-              </p>
-              <p className="text-sm text-muted-foreground">People Ahead</p>
+              </Typography>
+              <Typography variant="caption" color="text.secondary">People Ahead</Typography>
             </Card>
-          </motion.div>
-        </div>
-      </div>
+          </Grid>
+        </Grid>
+      </Box>
 
       {/* Services */}
-      <div className="px-4 mb-6">
-        <h3 className="text-lg font-semibold text-foreground mb-3">
+      <Box sx={{ px: 3, mb: 4 }}>
+        <Typography variant="h6" fontWeight="bold" gutterBottom>
           Your Services
-        </h3>
-        <Card className="p-4">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-foreground">Haircut</span>
-              <span className="text-muted-foreground">30 min • $25</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-foreground">Beard Trim</span>
-              <span className="text-muted-foreground">15 min • $15</span>
-            </div>
-            <div className="border-t border-border pt-3 flex items-center justify-between font-semibold">
-              <span className="text-foreground">Total</span>
-              <span className="text-primary">45 min • $40</span>
-            </div>
-          </div>
+        </Typography>
+        <Card sx={{ borderRadius: 3 }}>
+          <CardContent sx={{ p: 2 }}>
+            <Stack spacing={2}>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="body1">Haircut</Typography>
+                <Typography variant="body2" color="text.secondary">30 min • $25</Typography>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="body1">Beard Trim</Typography>
+                <Typography variant="body2" color="text.secondary">15 min • $15</Typography>
+              </Stack>
+              <Divider />
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="subtitle1" fontWeight="bold">Total</Typography>
+                <Typography variant="subtitle1" fontWeight="bold" color="primary.main">
+                  45 min • $40
+                </Typography>
+              </Stack>
+            </Stack>
+          </CardContent>
         </Card>
-      </div>
+      </Box>
 
       {/* Live Queue */}
-      <div className="px-4 mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold text-foreground">
-            Live Queue
-          </h3>
-          <ChevronDown className="h-5 w-5 text-muted-foreground" />
-        </div>
-        <div className="space-y-2">
+      <Box sx={{ px: 3, mb: 4 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+          <Typography variant="h6" fontWeight="bold">Live Queue</Typography>
+          <ExpandMoreIcon color="action" />
+        </Stack>
+        <Stack spacing={2}>
           {[1, 2, 3].map((num) => (
             <Card
               key={num}
-              className={`p-3 flex items-center justify-between ${
-                num === position ? "border-primary bg-primary/5" : ""
-              }`}
+              sx={{
+                borderRadius: 2,
+                p: 2,
+                border: 1,
+                borderColor: num === position ? "primary.main" : "transparent",
+                bgcolor: num === position ? (theme) => alpha(theme.palette.primary.main, 0.05) : "background.paper",
+              }}
             >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`h-8 w-8 rounded-full flex items-center justify-center font-semibold text-sm ${
-                    num === position
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {num}
-                </div>
-                <span className="text-foreground">
-                  {num === position ? "You" : `Customer ${num}`}
-                </span>
-              </div>
-              <span className="text-sm text-muted-foreground">
-                {num === 1 ? "In Progress" : "Waiting"}
-              </span>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: "50%",
+                      bgcolor: num === position ? "primary.main" : "action.selected",
+                      color: num === position ? "primary.contrastText" : "text.secondary",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "0.875rem",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {num}
+                  </Box>
+                  <Typography variant="body2" fontWeight="medium">
+                    {num === position ? "You" : `Customer ${num}`}
+                  </Typography>
+                </Stack>
+                <Typography variant="caption" color="text.secondary">
+                  {num === 1 ? "In Progress" : "Waiting"}
+                </Typography>
+              </Stack>
             </Card>
           ))}
-        </div>
-      </div>
+        </Stack>
+      </Box>
 
       {/* Actions */}
-      <div className="px-4 space-y-3">
-        <Button
-          variant="gold-outline"
-          size="lg"
-          className="w-full"
-          onClick={() => navigate("/customer/chat")}
-        >
-          <MessageCircle className="h-5 w-5 mr-2" />
-          Chat with Shop
-        </Button>
-        <Button variant="destructive" size="lg" className="w-full">
-          Leave Queue
-        </Button>
-      </div>
+      <Box sx={{ px: 3, mb: 2 }}>
+        <Stack spacing={2}>
+          <Button
+            variant="outlined"
+            size="large"
+            fullWidth
+            startIcon={<ChatBubbleOutlineIcon />}
+            onClick={() => navigate("/customer/chat")}
+            sx={{ borderRadius: 3 }}
+          >
+            Chat with Shop
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            size="large"
+            fullWidth
+            sx={{ borderRadius: 3 }}
+          >
+            Leave Queue
+          </Button>
+        </Stack>
+      </Box>
 
       <BottomNav />
-    </div>
+    </Box>
   );
 }
