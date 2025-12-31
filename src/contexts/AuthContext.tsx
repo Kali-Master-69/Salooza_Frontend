@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from "react";
+import { apiService } from "@/services/api";
 
 export type UserRole = "customer" | "barber" | "admin";
 
@@ -64,6 +65,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Initialize auth state
+  useEffect(() => {
+    const initAuth = async () => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        setIsLoading(true);
+        try {
+          const response = await apiService.getProfile(token);
+          const userData = response.data.user;
+
+          const profile = userData.customer || userData.barber || userData.admin;
+
+          setUser({
+            id: userData.id,
+            email: userData.email,
+            name: profile?.name || userData.email.split('@')[0],
+            role: userData.role.toLowerCase() as UserRole,
+            phone: profile?.phone,
+          });
+          setSelectedRole(userData.role.toLowerCase() as UserRole);
+        } catch (err) {
+          console.error('Auth initialization failed:', err);
+          localStorage.removeItem('authToken');
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    initAuth();
+  }, []);
+
   const selectRole = useCallback((role: UserRole) => {
     setSelectedRole(role);
     setError(null);
@@ -79,25 +112,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await apiService.login(selectedRole, { email, password });
 
-      // Mock validation - in production, this would call your API
-      if (password.length < 6) {
-        setError("Invalid credentials");
-        return false;
-      }
+      // Store token in localStorage
+      localStorage.setItem('authToken', response.token);
 
-      // Create user with selected role
+      // Create user object from response
       const newUser: User = {
-        ...mockUsers[selectedRole],
-        email,
+        id: response.data.user.id,
+        email: response.data.user.email,
+        name: email.split('@')[0], // Temporary, should come from backend
+        role: selectedRole,
       };
 
       setUser(newUser);
       return true;
     } catch (err) {
-      setError("Login failed. Please try again.");
+      const errorMessage = err instanceof Error ? err.message : "Login failed. Please try again.";
+      setError(errorMessage);
       return false;
     } finally {
       setIsLoading(false);
@@ -114,12 +146,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await apiService.register(selectedRole, data);
 
-      // Create new user with registration data
+      // Store token in localStorage
+      localStorage.setItem('authToken', response.token);
+
+      // Create user object from response
       const newUser: User = {
-        id: `${selectedRole}-${Date.now()}`,
+        id: response.data.user.id,
         name: data.name,
         email: data.email,
         phone: data.phone,
@@ -129,7 +163,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(newUser);
       return true;
     } catch (err) {
-      setError("Registration failed. Please try again.");
+      const errorMessage = err instanceof Error ? err.message : "Registration failed. Please try again.";
+      setError(errorMessage);
       return false;
     } finally {
       setIsLoading(false);
@@ -137,6 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [selectedRole]);
 
   const logout = useCallback(() => {
+    localStorage.removeItem('authToken');
     setUser(null);
     setSelectedRole(null);
     setError(null);

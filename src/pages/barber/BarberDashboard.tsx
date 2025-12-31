@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -11,6 +11,8 @@ import {
   Chip,
   alpha,
   Grid,
+  Switch,
+  FormControlLabel,
 } from "@mui/material";
 import GroupIcon from "@mui/icons-material/Group";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -21,6 +23,9 @@ import ContentCutIcon from "@mui/icons-material/ContentCut";
 import TimerIcon from "@mui/icons-material/Timer";
 
 import { BottomNav } from "@/components/layout/BottomNav";
+import { apiService } from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
+
 
 interface QueueCustomer {
   id: string;
@@ -31,76 +36,151 @@ interface QueueCustomer {
   status: "waiting" | "in-progress" | "completed";
 }
 
-const mockQueue: QueueCustomer[] = [
-  {
-    id: "1",
-    name: "John Smith",
-    services: ["Haircut", "Beard Trim"],
-    estimatedTime: 45,
-    position: 1,
-    status: "in-progress",
-  },
-  {
-    id: "2",
-    name: "Mike Johnson",
-    services: ["Haircut"],
-    estimatedTime: 30,
-    position: 2,
-    status: "waiting",
-  },
-  {
-    id: "3",
-    name: "David Wilson",
-    services: ["Shave", "Hair Wash"],
-    estimatedTime: 35,
-    position: 3,
-    status: "waiting",
-  },
-];
 
 export default function BarberDashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [isQueueActive, setIsQueueActive] = useState(true);
-  const [queue, setQueue] = useState<QueueCustomer[]>(mockQueue);
+  const [queue, setQueue] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [shop, setShop] = useState<any>(null);
+  const [isAvailable, setIsAvailable] = useState(true);
+
+  const fetchDashboardData = async () => {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+    try {
+      const [queueRes, shopRes] = await Promise.all([
+        apiService.getMyQueue(token),
+        apiService.getMyShop(token)
+      ]);
+      setQueue(queueRes.data.items);
+      setShop(shopRes.data);
+      setIsQueueActive(!shopRes.data?.queue?.isPaused);
+      setIsAvailable(shopRes.data?.barbers?.[0]?.isAvailable ?? true); // Assuming barber is in shop include
+    } catch (error) {
+      console.error("Failed to fetch dashboard data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const shopStatus = shop?.status || "DRAFT";
+  const isShopComplete = shopStatus !== "DRAFT";
+  const isShopActive = shopStatus === "ACTIVE";
+
+
+  const handleTogglePause = async () => {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+    try {
+      const newStatus = !isQueueActive;
+      await apiService.toggleQueuePause(token, !newStatus); // backend takes isPaused
+      setIsQueueActive(newStatus);
+    } catch (error) {
+      console.error("Failed to toggle queue status:", error);
+    }
+  };
+
+  const handleToggleAvailability = async () => {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+    try {
+      const newStatus = !isAvailable;
+      await apiService.updateAvailability(token, newStatus);
+      setIsAvailable(newStatus);
+    } catch (error) {
+      console.error("Failed to toggle availability:", error);
+    }
+  };
 
   const totalWaitTime = queue
     .filter((c) => c.status === "waiting")
     .reduce((acc, c) => acc + c.estimatedTime, 0);
 
-  const handleCompleteCustomer = (customerId: string) => {
-    setQueue((prev) =>
-      prev.map((c) =>
-        c.id === customerId ? { ...c, status: "completed" as const } : c
-      )
-    );
+  const handleCompleteCustomer = async (customerId: string) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+    try {
+      await apiService.updateQueueStatus(token, customerId, "COMPLETED");
+      fetchDashboardData();
+    } catch (error) {
+      console.error("Failed to complete customer:", error);
+    }
   };
 
-  const handleStartCustomer = (customerId: string) => {
-    setQueue((prev) =>
-      prev.map((c) =>
-        c.id === customerId ? { ...c, status: "in-progress" as const } : c
-      )
-    );
+  const handleStartCustomer = async (customerId: string) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+    try {
+      await apiService.updateQueueStatus(token, customerId, "SERVING");
+      fetchDashboardData();
+    } catch (error) {
+      console.error("Failed to start customer:", error);
+    }
   };
 
-  const activeQueue = queue.filter((c) => c.status !== "completed");
+  const activeQueue = queue.filter((c) => c.status === "WAITING" || c.status === "SERVING");
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 12 }}>
       {/* Header */}
-      <Box sx={{ px: 3, pt: 6, pb: 4 }}>
-        <Typography variant="h4" fontWeight="bold">
-          Barber Dashboard
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          Manage your queue
-        </Typography>
+      <Box sx={{ px: 3, pt: 6, pb: 4, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <Box>
+          <Typography variant="h4" fontWeight="bold">
+            Barber Dashboard
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Manage your queue
+          </Typography>
+        </Box>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={isAvailable}
+              onChange={handleToggleAvailability}
+              color="success"
+            />
+          }
+          label={isAvailable ? "Available" : "Busy"}
+          labelPlacement="bottom"
+          sx={{ m: 0 }}
+        />
       </Box>
+
+      {/* Shop Completeness Guard */}
+      {!isLoading && !isShopComplete && (
+        <Box sx={{ px: 3, mb: 4 }}>
+          <Card sx={{ bgcolor: (theme) => alpha(theme.palette.warning.main, 0.1), border: 1, borderColor: "warning.main" }}>
+            <CardContent>
+              <Typography variant="subtitle2" fontWeight="bold" color="warning.main" gutterBottom>
+                Shop Setup Incomplete
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Your shop is not visible to customers. Please provide an address and add at least one service.
+              </Typography>
+              <Button
+                variant="contained"
+                color="warning"
+                size="small"
+                onClick={() => navigate("/barber/settings")} // Map to settings for setup
+
+              >
+                Complete Setup
+              </Button>
+            </CardContent>
+          </Card>
+        </Box>
+      )}
 
       {/* Stats */}
       <Box sx={{ px: 3, mb: 4 }}>
         <Grid container spacing={2}>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <Card sx={{ borderRadius: 3 }}>
               <CardContent sx={{ p: 2 }}>
                 <Stack direction="row" spacing={2} alignItems="center">
@@ -125,7 +205,7 @@ export default function BarberDashboard() {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <Card sx={{ borderRadius: 3 }}>
               <CardContent sx={{ p: 2 }}>
                 <Stack direction="row" spacing={2} alignItems="center">
@@ -162,15 +242,19 @@ export default function BarberDashboard() {
             size="large"
             startIcon={isQueueActive ? <PauseIcon /> : <PlayArrowIcon />}
             fullWidth
-            onClick={() => setIsQueueActive(!isQueueActive)}
+            disabled={!isShopComplete}
+            onClick={handleTogglePause}
             sx={{ borderRadius: 3, py: 1.5 }}
           >
-            {isQueueActive ? "Pause Queue" : "Start Queue"}
+            {shopStatus === "PAUSED" ? "Resume Queue" : isQueueActive ? "Pause Queue" : "Start Queue"}
           </Button>
+
           <Button
             variant="outlined"
             size="large"
+            disabled={!isShopComplete}
             onClick={() => navigate("/barber/add-walkin")}
+
             sx={{ borderRadius: 3, minWidth: 64, borderColor: "divider" }}
           >
             <AddIcon />
@@ -182,29 +266,32 @@ export default function BarberDashboard() {
       <Box sx={{ px: 3, mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="h6" fontWeight="bold">Live Queue</Typography>
         <Chip
-          label={isQueueActive ? "Active" : "Paused"}
-          color={isQueueActive ? "success" : "error"} // Use success/error for better distinction
-          variant="outlined" // Or filled with alpha bg
+          label={shopStatus}
+          color={shopStatus === "ACTIVE" ? "success" : shopStatus === "PAUSED" ? "warning" : "error"}
+          variant="outlined"
           size="small"
           sx={{
             fontWeight: "bold",
-            bgcolor: (theme) => alpha(theme.palette[isQueueActive ? "success" : "error"].main, 0.1),
+            bgcolor: (theme) => alpha(theme.palette[shopStatus === "ACTIVE" ? "success" : shopStatus === "PAUSED" ? "warning" : "error"].main, 0.1),
             borderColor: "transparent",
-            color: isQueueActive ? "success.main" : "error.main",
+            color: (theme) => theme.palette[shopStatus === "ACTIVE" ? "success" : shopStatus === "PAUSED" ? "warning" : "error"].main,
           }}
         />
+
       </Box>
 
       {/* Queue List */}
       <Stack spacing={2} sx={{ px: 3 }}>
-        {activeQueue.map((customer) => (
+        {isLoading ? (
+          <Typography color="text.secondary" align="center">Loading queue...</Typography>
+        ) : activeQueue.map((item, index) => (
           <Card
-            key={customer.id}
+            key={item.id}
             sx={{
               borderRadius: 3,
               border: 1,
-              borderColor: customer.status === "in-progress" ? "primary.main" : "divider",
-              bgcolor: customer.status === "in-progress" ? (theme) => alpha(theme.palette.primary.main, 0.05) : "background.paper",
+              borderColor: item.status === "SERVING" ? "primary.main" : "divider",
+              bgcolor: item.status === "SERVING" ? (theme) => alpha(theme.palette.primary.main, 0.05) : "background.paper",
             }}
           >
             <CardContent sx={{ p: 2 }}>
@@ -216,8 +303,8 @@ export default function BarberDashboard() {
                       width: 40,
                       height: 40,
                       borderRadius: "50%",
-                      bgcolor: customer.status === "in-progress" ? "primary.main" : "action.hover",
-                      color: customer.status === "in-progress" ? "primary.contrastText" : "text.secondary",
+                      bgcolor: item.status === "SERVING" ? "primary.main" : "action.hover",
+                      color: item.status === "SERVING" ? "primary.contrastText" : "text.secondary",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -225,16 +312,18 @@ export default function BarberDashboard() {
                       flexShrink: 0,
                     }}
                   >
-                    {customer.position}
+                    {index + 1}
                   </Box>
 
                   <Box>
-                    <Typography variant="subtitle1" fontWeight="bold">{customer.name}</Typography>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      {item.customer?.name || "Customer"}
+                    </Typography>
                     <Stack direction="row" spacing={1} sx={{ mt: 0.5, flexWrap: "wrap", gap: 0.5 }}>
-                      {customer.services.map((service) => (
+                      {item.services?.map((s: any) => (
                         <Chip
-                          key={service}
-                          label={service}
+                          key={s.id}
+                          label={s.service?.name || s.name}
                           size="small"
                           sx={{ height: 20, fontSize: "0.7rem" }}
                         />
@@ -243,18 +332,18 @@ export default function BarberDashboard() {
                     <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mt: 1 }}>
                       <TimerIcon fontSize="small" color="action" sx={{ fontSize: 16 }} />
                       <Typography variant="caption" color="text.secondary">
-                        {customer.estimatedTime} min
+                        {item.estimatedWaitTime} min
                       </Typography>
                     </Stack>
                   </Box>
                 </Stack>
 
                 <Box>
-                  {customer.status === "waiting" ? (
+                  {item.status === "WAITING" ? (
                     <Button
                       variant="contained"
                       size="small"
-                      onClick={() => handleStartCustomer(customer.id)}
+                      onClick={() => handleStartCustomer(item.id)}
                     >
                       Start
                     </Button>
@@ -262,7 +351,7 @@ export default function BarberDashboard() {
                     <Button
                       variant="outlined"
                       size="small"
-                      onClick={() => handleCompleteCustomer(customer.id)}
+                      onClick={() => handleCompleteCustomer(item.id)}
                     >
                       Done
                     </Button>
@@ -270,7 +359,7 @@ export default function BarberDashboard() {
                 </Box>
               </Stack>
 
-              {customer.status === "in-progress" && (
+              {item.status === "SERVING" && (
                 <Box sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: "divider", display: "flex", alignItems: "center", gap: 1, color: "primary.main" }}>
                   <ContentCutIcon fontSize="small" />
                   <Typography variant="caption" fontWeight="bold" textTransform="uppercase">
@@ -289,6 +378,7 @@ export default function BarberDashboard() {
               startIcon={<AddIcon />}
               sx={{ mt: 2 }}
               onClick={() => navigate("/barber/add-walkin")}
+
             >
               Add Walk-in
             </Button>

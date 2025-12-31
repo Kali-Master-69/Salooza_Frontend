@@ -38,7 +38,16 @@ export default function CustomerProfile() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
+  if (!user) {
+    return (
+      <Box sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Typography>Loading profile...</Typography>
+      </Box>
+    );
+  }
+
   const handleLogout = () => {
+
     logout();
     navigate("/");
   };

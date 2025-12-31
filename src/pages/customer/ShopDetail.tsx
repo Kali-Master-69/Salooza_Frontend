@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -18,11 +18,15 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ShareIcon from "@mui/icons-material/Share";
 import StarIcon from "@mui/icons-material/Star";
+import { BottomNav } from "@/components/layout/BottomNav";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PhoneIcon from "@mui/icons-material/Phone";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
+import { apiService } from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
+
 
 import salonInterior from "@/assets/salon-interior.jpg";
 import barberPortrait from "@/assets/barber-portrait.jpg";
@@ -34,26 +38,41 @@ interface Service {
   price: number;
 }
 
-const services: Service[] = [
-  { id: "1", name: "Haircut", duration: 30, price: 25 },
-  { id: "2", name: "Beard Trim", duration: 15, price: 15 },
-  { id: "3", name: "Hair Wash", duration: 10, price: 10 },
-  { id: "4", name: "Shave", duration: 20, price: 20 },
-  { id: "5", name: "Hair Color", duration: 60, price: 50 },
-  { id: "6", name: "Facial", duration: 45, price: 35 },
-];
-
-const barbers = [
-  { id: "1", name: "James", available: true, image: barberPortrait },
-  { id: "2", name: "Mike", available: true, image: barberPortrait },
-  { id: "3", name: "John", available: false, image: barberPortrait },
-];
 
 export default function ShopDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [shop, setShop] = useState<any>(null);
+  const [services, setServices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    const fetchShopData = async () => {
+      if (!id) return;
+      try {
+        // Get token from localStorage for authenticated requests
+        const token = localStorage.getItem('authToken');
+        const shopRes = await apiService.getShopDetails(id, token || undefined);
+        const servicesRes = await apiService.getServices(id, token || undefined);
+        setShop(shopRes.data);
+        setServices(servicesRes.data);
+      } catch (error: any) {
+        console.error("Failed to fetch shop data:", error);
+        if (error.message?.includes('not available') || error.message?.includes('not found')) {
+          navigate('/customer/home'); // Redirect if shop becomes unavailable
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchShopData();
+  }, [id, navigate]);
+
+  const isQueuePaused = shop?.status === "PAUSED";
+
 
   const toggleService = (serviceId: string) => {
     setSelectedServices((prev) =>
@@ -64,15 +83,26 @@ export default function ShopDetail() {
   };
 
   const totalDuration = services
-    .filter((s) => selectedServices.includes(s.id))
-    .reduce((acc, s) => acc + s.duration, 0);
+    .reduce((acc, s) => {
+      const duration = s.durations.find((d: any) => selectedServices.includes(d.id));
+      return acc + (duration ? duration.duration : 0);
+    }, 0);
 
   const totalPrice = services
-    .filter((s) => selectedServices.includes(s.id))
-    .reduce((acc, s) => acc + s.price, 0);
+    .reduce((acc, s) => {
+      const duration = s.durations.find((d: any) => selectedServices.includes(d.id));
+      return acc + (duration ? parseFloat(duration.price) : 0);
+    }, 0);
 
   const handleJoinQueue = () => {
-    navigate("/customer/queue", { state: { selectedServices, shopId: id } });
+    navigate("/customer/queue", { 
+      state: { 
+        selectedServices, 
+        shopId: id,
+        shop,
+        services 
+      } 
+    });
   };
 
   return (
@@ -132,7 +162,7 @@ export default function ShopDetail() {
         <Card sx={{ mb: 3, borderRadius: 3 }}>
           <CardContent>
             <Typography variant="h5" fontWeight="bold" gutterBottom>
-              Stylish Barber Shop
+              {shop?.name || "Loading..."}
             </Typography>
             <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
               <StarIcon fontSize="small" color="primary" />
@@ -142,103 +172,62 @@ export default function ShopDetail() {
             <Stack spacing={1} sx={{ mt: 2 }}>
               <Stack direction="row" spacing={1} alignItems="center">
                 <LocationOnIcon fontSize="small" color="action" />
-                <Typography variant="body2" color="text.secondary">127 Nature Lodge, Chicago</Typography>
+                <Typography variant="body2" color="text.secondary">{shop?.address || "No address provided"}</Typography>
               </Stack>
               <Stack direction="row" spacing={1} alignItems="center">
                 <AccessTimeIcon fontSize="small" color="action" />
-                <Typography variant="body2" color="text.secondary">Open: 9:00 AM - 9:00 PM</Typography>
-              </Stack>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <PhoneIcon fontSize="small" color="action" />
-                <Typography variant="body2" color="text.secondary">+1 234 567 890</Typography>
+                <Typography variant="body2" color="text.secondary">Open: {shop?.openTime} - {shop?.closeTime}</Typography>
               </Stack>
             </Stack>
           </CardContent>
         </Card>
-
-        {/* Barbers */}
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" fontWeight="bold" gutterBottom>
-            Our Barbers
-          </Typography>
-          <Stack
-            direction="row"
-            spacing={2}
-            sx={{
-              overflowX: "auto",
-              pb: 1,
-              "&::-webkit-scrollbar": { display: "none" },
-              scrollbarWidth: "none",
-            }}
-          >
-            {barbers.map((barber) => (
-              <Box key={barber.id} sx={{ textAlign: "center", minWidth: 70 }}>
-                <Box
-                  sx={{
-                    position: "relative",
-                    display: "inline-block",
-                    borderRadius: "50%",
-                    p: 0.3,
-                    border: 2,
-                    borderColor: barber.available ? "success.main" : "text.disabled",
-                  }}
-                >
-                  <Avatar src={barber.image} sx={{ width: 60, height: 60 }} />
-                </Box>
-                <Typography variant="body2" fontWeight="medium" sx={{ mt: 1 }}>
-                  {barber.name}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  color={barber.available ? "success.main" : "text.secondary"}
-                >
-                  {barber.available ? "Available" : "Busy"}
-                </Typography>
-              </Box>
-            ))}
-          </Stack>
-        </Box>
 
         {/* Services */}
         <Box>
           <Typography variant="h6" fontWeight="bold" gutterBottom>
             Select Services
           </Typography>
-          <Stack spacing={1.5}>
-            {services.map((service) => {
-              const isSelected = selectedServices.includes(service.id);
-              return (
-                <Card
-                  key={service.id}
-                  sx={{
-                    borderRadius: 2,
-                    border: 1,
-                    borderColor: isSelected ? "primary.main" : "divider",
-                    bgcolor: isSelected ? (theme) => alpha(theme.palette.primary.main, 0.05) : "background.paper",
-                  }}
-                >
-                  <CardActionArea onClick={() => toggleService(service.id)} sx={{ p: 2 }}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
-                      <Box>
-                        <Typography variant="subtitle1" fontWeight="medium">{service.name}</Typography>
-                        <Typography variant="body2" color="text.secondary">{service.duration} min</Typography>
-                      </Box>
-                      <Stack direction="row" alignItems="center" spacing={2}>
-                        <Typography variant="h6" color="primary.main" fontWeight="bold">
-                          ${service.price}
-                        </Typography>
-                        {isSelected ? (
-                          <CheckCircleIcon color="primary" />
-                        ) : (
-                          <CircleOutlinedIcon color="disabled" />
-                        )}
+          {loading ? (
+            <Typography color="text.secondary">Loading services...</Typography>
+          ) : services.length === 0 ? (
+            <Typography color="text.secondary">Services not added yet</Typography>
+          ) : (
+            <Stack spacing={1.5}>
+              {services.flatMap((s) => s.durations.map((duration: any) => {
+                const isSelected = selectedServices.includes(duration.id);
+                return (
+                  <Card
+                    key={duration.id}
+                    sx={{
+                      borderRadius: 2,
+                      border: 1,
+                      borderColor: isSelected ? "primary.main" : "divider",
+                      bgcolor: isSelected ? (theme) => alpha(theme.palette.primary.main, 0.05) : "background.paper",
+                    }}
+                  >
+                    <CardActionArea onClick={() => toggleService(duration.id)} sx={{ p: 2 }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Box>
+                          <Typography variant="subtitle1" fontWeight="medium">{s.name} - {duration.name}</Typography>
+                          <Typography variant="body2" color="text.secondary">{duration.duration} min</Typography>
+                        </Box>
+                        <Stack direction="row" alignItems="center" spacing={2}>
+                          <Typography variant="h6" color="primary.main" fontWeight="bold">
+                            ${duration.price}
+                          </Typography>
+                          {isSelected ? (
+                            <CheckCircleIcon color="primary" />
+                          ) : (
+                            <CircleOutlinedIcon color="disabled" />
+                          )}
+                        </Stack>
                       </Stack>
-                    </Stack>
-                  </CardActionArea>
-                </Card>
-              );
-            })}
-          </Stack>
+                    </CardActionArea>
+                  </Card>
+                );
+              }))}
+            </Stack>
+          )}
         </Box>
       </Box>
 
@@ -254,13 +243,6 @@ export default function ShopDetail() {
             p: 3,
             borderTopLeftRadius: 16,
             borderTopRightRadius: 16,
-            zIndex: 100, // Above bottom nav if present, but ShopDetail usually covers it?
-            // Actually BottomNav is z-index 1000. Wait, ShopDetail covers full screen?
-            // Yes usually sub-pages cover nav or have their own.
-            // But if BottomNav is fixed z-1000, this might be behind it.
-            // I'll adjust z-index to 1200 or assume Detail page shouldn't show global BottomNav?
-            // User flow: Detail page -> Queue.
-            // I'll put zIndex high.
             zIndex: 1200,
           }}
         >
@@ -278,13 +260,15 @@ export default function ShopDetail() {
             variant="contained"
             size="large"
             fullWidth
+            disabled={isQueuePaused}
             onClick={handleJoinQueue}
             sx={{ borderRadius: 3, py: 1.5, fontSize: "1.1rem" }}
           >
-            Join Queue
+            {isQueuePaused ? "Queue Paused" : "Join Queue"}
           </Button>
         </Paper>
       )}
+      <BottomNav />
     </Box>
   );
 }

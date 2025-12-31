@@ -17,11 +17,17 @@ import OTPVerifyScreen from "./pages/auth/OTPVerifyScreen";
 import CustomerHome from "./pages/customer/CustomerHome";
 import ShopDetail from "./pages/customer/ShopDetail";
 import QueueStatus from "./pages/customer/QueueStatus";
+import QueueConfirmation from "./pages/customer/QueueConfirmation";
 import CustomerProfile from "./pages/customer/CustomerProfile";
 import ExploreShops from "./pages/customer/ExploreShops";
+import CustomerChat from "./pages/customer/CustomerChat";
 
 // Barber Pages
-import BarberDashboard from "./pages/barber/BarberDashboard";
+import BarberDashboard from "@/pages/barber/BarberDashboard";
+import ShopSetup from "@/pages/barber/ShopSetup";
+import AddWalkIn from "@/pages/barber/AddWalkIn";
+import ServicesManagement from "@/pages/barber/ServicesManagement";
+import BarberSettings from "@/pages/barber/BarberSettings";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -35,7 +41,7 @@ const App = () => (
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <AuthProvider>
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             {/* Auth Routes */}
             <Route path="/" element={<SplashScreen />} />
@@ -51,15 +57,18 @@ const App = () => (
             <Route path="/customer/explore" element={<ExploreShops />} />
             <Route path="/customer/shop/:id" element={<ShopDetail />} />
             <Route path="/customer/queue" element={<QueueStatus />} />
-            <Route path="/customer/chat" element={<QueueStatus />} />
+            <Route path="/customer/queue-join" element={<QueueConfirmation />} />
+            <Route path="/customer/chat" element={<CustomerChat />} />
             <Route path="/customer/profile" element={<CustomerProfile />} />
 
             {/* Barber Routes */}
             <Route path="/barber" element={<BarberDashboard />} />
+            <Route path="/barber/shop-setup" element={<ShopSetup />} />
             <Route path="/barber/queue" element={<BarberDashboard />} />
-            <Route path="/barber/services" element={<BarberDashboard />} />
+            <Route path="/barber/add-walkin" element={<AddWalkIn />} />
+            <Route path="/barber/services" element={<ServicesManagement />} />
             <Route path="/barber/chat" element={<BarberDashboard />} />
-            <Route path="/barber/settings" element={<BarberDashboard />} />
+            <Route path="/barber/settings" element={<BarberSettings />} />
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
