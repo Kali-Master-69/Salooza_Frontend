@@ -32,6 +32,7 @@ export default function QueueConfirmation() {
   const [error, setError] = useState<string | null>(null);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [tokenNumber, setTokenNumber] = useState<number | null>(null);
+  const [currentPosition, setCurrentPosition] = useState<number | null>(null);
 
   // Get data from navigation state
   const state = location.state as {
@@ -65,9 +66,14 @@ export default function QueueConfirmation() {
   const totalPrice = serviceDetails.reduce((acc, s) => acc + parseFloat(s.price), 0);
 
   const handleJoinQueue = async () => {
+    console.log("[DEBUG] handleJoinQueue called");
+    console.log("[DEBUG] selectedServices:", selectedServices);
+    console.log("[DEBUG] shopId:", shopId);
+    
     const token = localStorage.getItem("authToken");
     if (!token) {
       setError("No authentication token found. Please login again.");
+      console.error("[ERROR] No auth token");
       return;
     }
 
@@ -75,25 +81,34 @@ export default function QueueConfirmation() {
     setError(null);
 
     try {
+      console.log("[DEBUG] Calling apiService.joinQueue...");
       const response = await apiService.joinQueue(token, shopId, selectedServices);
-      console.log("Queue join response:", response);
+      console.log("[DEBUG] Queue join response:", response);
 
-      // Show success dialog with token number
-      setTokenNumber(response.data.tokenNumber);
+      // Extract currentPosition from response (now included in joinQueue response)
+      const position = response.data.currentPosition || 1;
+      const token_num = response.data.tokenNumber;
+      
+      console.log("[DEBUG] Position from response:", position, "Token:", token_num);
+
+      // Show success dialog with current position (not token number)
+      setTokenNumber(token_num);
+      setCurrentPosition(position);
       setSuccessDialogOpen(true);
 
       // Navigate to queue status after 2 seconds
       setTimeout(() => {
-        navigate("/customer/queue-status", {
+        navigate("/customer/queue", {
           state: { 
             joinedSuccessfully: true, 
             queueItem: response.data,
-            tokenNumber: response.data.tokenNumber
+            currentPosition: position,
+            tokenNumber: token_num
           },
         });
       }, 2000);
     } catch (err: any) {
-      console.error("Failed to join queue:", err);
+      console.error("[ERROR] Failed to join queue:", err);
       setError(err.message || "Failed to join queue. Please try again.");
       setLoading(false);
     }
@@ -288,8 +303,8 @@ export default function QueueConfirmation() {
           <Typography variant="h6" fontWeight="bold" gutterBottom>
             Successfully Joined Queue!
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Your token number is:
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Your position in queue:
           </Typography>
           <Box
             sx={{
@@ -306,8 +321,11 @@ export default function QueueConfirmation() {
               mb: 2,
             }}
           >
-            #{tokenNumber}
+            #{currentPosition}
           </Box>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
+            Token: #{tokenNumber} (for reference)
+          </Typography>
           <Typography variant="body2" color="text.secondary">
             You will be redirected to your queue status shortly...
           </Typography>
@@ -317,7 +335,7 @@ export default function QueueConfirmation() {
             variant="contained"
             onClick={() => {
               setSuccessDialogOpen(false);
-              navigate("/customer/queue-status");
+              navigate("/customer/queue");
             }}
           >
             View Queue Status

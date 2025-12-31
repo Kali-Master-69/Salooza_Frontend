@@ -146,12 +146,24 @@ class ApiService {
 
     // Queue APIs
     async joinQueue(token: string, shopId: string, serviceIds: string[]) {
+        console.log("[DEBUG API] joinQueue called with shopId:", shopId, "serviceIds:", serviceIds);
         const response = await fetch(`${API_BASE_URL}/queue/join`, {
             method: 'POST',
             headers: this.getAuthHeaders(token),
             body: JSON.stringify({ shopId, serviceIds }),
         });
+        console.log("[DEBUG API] joinQueue response status:", response.status);
         if (!response.ok) throw new Error('Failed to join queue');
+        return response.json();
+    }
+
+    async getQueuePreview(shopId: string) {
+        console.log("[DEBUG API] getQueuePreview called for shopId:", shopId);
+        const response = await fetch(`${API_BASE_URL}/queue/${shopId}/preview`, {
+            method: 'GET',
+            headers: this.getAuthHeaders(),
+        });
+        if (!response.ok) throw new Error('Failed to fetch queue preview');
         return response.json();
     }
 
@@ -188,6 +200,15 @@ class ApiService {
             body: JSON.stringify({ status }),
         });
         if (!response.ok) throw new Error('Failed to update status');
+        return response.json();
+    }
+
+    async leaveQueue(token: string, itemId: string) {
+        const response = await fetch(`${API_BASE_URL}/queue/${itemId}/leave`, {
+            method: 'DELETE',
+            headers: this.getAuthHeaders(token),
+        });
+        if (!response.ok) throw new Error('Failed to leave queue');
         return response.json();
     }
 

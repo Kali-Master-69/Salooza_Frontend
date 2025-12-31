@@ -50,16 +50,20 @@ export default function BarberDashboard() {
     const token = localStorage.getItem('authToken');
     if (!token) return;
     try {
+      console.log("[DEBUG BARBER] Fetching dashboard data...");
       const [queueRes, shopRes] = await Promise.all([
         apiService.getMyQueue(token),
         apiService.getMyShop(token)
       ]);
+      console.log("[DEBUG BARBER] Queue response:", queueRes);
+      console.log("[DEBUG BARBER] Queue items:", queueRes.data.items);
+      console.log("[DEBUG BARBER] Shop response:", shopRes);
       setQueue(queueRes.data.items);
       setShop(shopRes.data);
       setIsQueueActive(!shopRes.data?.queue?.isPaused);
       setIsAvailable(shopRes.data?.barbers?.[0]?.isAvailable ?? true); // Assuming barber is in shop include
     } catch (error) {
-      console.error("Failed to fetch dashboard data:", error);
+      console.error("[ERROR BARBER] Failed to fetch dashboard data:", error);
     } finally {
       setIsLoading(false);
     }

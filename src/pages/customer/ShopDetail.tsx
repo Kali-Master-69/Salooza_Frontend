@@ -18,11 +18,12 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ShareIcon from "@mui/icons-material/Share";
 import StarIcon from "@mui/icons-material/Star";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import GroupIcon from "@mui/icons-material/Group";
 import { BottomNav } from "@/components/layout/BottomNav";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PhoneIcon from "@mui/icons-material/Phone";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 import { apiService } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -48,6 +49,8 @@ export default function ShopDetail() {
   const [loading, setLoading] = useState(true);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [queuePreview, setQueuePreview] = useState<{ customersWaiting: number } | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchShopData = async () => {
@@ -59,6 +62,16 @@ export default function ShopDetail() {
         const servicesRes = await apiService.getServices(id, token || undefined);
         setShop(shopRes.data);
         setServices(servicesRes.data);
+
+        // Fetch queue preview (how many people are waiting)
+        try {
+          const previewRes = await apiService.getQueuePreview(id);
+          setQueuePreview(previewRes.data);
+          setPreviewError(null);
+        } catch (error: any) {
+          console.warn("[WARN] Failed to fetch queue preview:", error);
+          setPreviewError(null); // Don't show error to user, just don't display preview
+        }
       } catch (error: any) {
         console.error("Failed to fetch shop data:", error);
         if (error.message?.includes('not available') || error.message?.includes('not found')) {
@@ -95,7 +108,7 @@ export default function ShopDetail() {
     }, 0);
 
   const handleJoinQueue = () => {
-    navigate("/customer/queue", { 
+    navigate("/customer/queue-join", { 
       state: { 
         selectedServices, 
         shopId: id,
@@ -187,6 +200,34 @@ export default function ShopDetail() {
           <Typography variant="h6" fontWeight="bold" gutterBottom>
             Select Services
           </Typography>
+
+          {/* Queue Preview - Show how many people are waiting */}
+          {queuePreview !== null && (
+            <Card sx={{ mb: 2, borderRadius: 2, bgcolor: (theme) => alpha(theme.palette.info.main, 0.05), borderColor: 'info.main', borderWidth: 1 }}>
+              <CardContent sx={{ p: 2 }}>
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                  {queuePreview.customersWaiting === 0 ? (
+                    <>
+                      <CheckCircleIcon color="success" sx={{ fontSize: 20 }} />
+                      <Typography variant="body2" fontWeight="500">
+                        No wait - you can be served immediately!
+                      </Typography>
+                    </>
+                  ) : (
+                    <>
+                      <GroupIcon color="info" sx={{ fontSize: 20 }} />
+                      <Typography variant="body2" fontWeight="500">
+                        {queuePreview.customersWaiting === 1 
+                          ? "1 person is ahead of you" 
+                          : `${queuePreview.customersWaiting} people are ahead of you`}
+                      </Typography>
+                    </>
+                  )}
+                </Stack>
+              </CardContent>
+            </Card>
+          )}
+
           {loading ? (
             <Typography color="text.secondary">Loading services...</Typography>
           ) : services.length === 0 ? (

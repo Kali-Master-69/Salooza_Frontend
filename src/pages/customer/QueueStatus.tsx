@@ -25,6 +25,7 @@ export default function QueueStatus() {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [queueData, setQueueData] = useState<any>(null);
+  const [leavingQueue, setLeavingQueue] = useState(false);
 
   const fetchQueueStatus = async () => {
     const token = localStorage.getItem("authToken");
@@ -40,6 +41,30 @@ export default function QueueStatus() {
       console.error("Failed to fetch queue status:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLeaveQueue = async () => {
+    if (!queueData || !queueData.item) return;
+
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    setLeavingQueue(true);
+    try {
+      await apiService.leaveQueue(token, queueData.item.id);
+      // After successfully leaving, redirect to explore shops
+      navigate("/customer/explore", { 
+        state: { message: "You have left the queue" } 
+      });
+    } catch (error) {
+      console.error("Failed to leave queue:", error);
+      alert("Failed to leave queue. Please try again.");
+    } finally {
+      setLeavingQueue(false);
     }
   };
 
@@ -254,8 +279,10 @@ export default function QueueStatus() {
             size="large"
             fullWidth
             sx={{ borderRadius: 3 }}
+            onClick={handleLeaveQueue}
+            disabled={leavingQueue}
           >
-            Leave Queue
+            {leavingQueue ? "Leaving..." : "Leave Queue"}
           </Button>
         </Stack>
       </Box>
