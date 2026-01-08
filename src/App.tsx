@@ -28,6 +28,7 @@ import ShopSetup from "@/pages/barber/ShopSetup";
 import AddWalkIn from "@/pages/barber/AddWalkIn";
 import ServicesManagement from "@/pages/barber/ServicesManagement";
 import BarberSettings from "@/pages/barber/BarberSettings";
+import BarberChat from "@/pages/barber/BarberChat";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -67,7 +68,7 @@ const App = () => (
             <Route path="/barber/queue" element={<BarberDashboard />} />
             <Route path="/barber/add-walkin" element={<AddWalkIn />} />
             <Route path="/barber/services" element={<ServicesManagement />} />
-            <Route path="/barber/chat" element={<BarberDashboard />} />
+            <Route path="/barber/chat" element={<BarberChat />} />
             <Route path="/barber/settings" element={<BarberSettings />} />
 
             {/* Admin Routes */}
@@ -75,6 +76,12 @@ const App = () => (
             <Route path="/admin/users" element={<AdminDashboard />} />
             <Route path="/admin/barbers" element={<AdminDashboard />} />
             <Route path="/admin/shops" element={<AdminDashboard />} />
+            <Route path="/admin/settings" element={<AdminDashboard />} />
+
+            {/* Missing Miscellaneous Routes to prevent 404 */}
+            <Route path="/customer/settings" element={<CustomerProfile />} />
+            <Route path="/customer/profile/edit" element={<CustomerProfile />} />
+            <Route path="/customer/support" element={<CustomerProfile />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

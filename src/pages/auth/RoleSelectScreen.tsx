@@ -148,7 +148,7 @@ export default function RoleSelectScreen() {
                 "&:hover": { textDecoration: "underline" },
               }}
               onClick={() =>
-                navigate(`/auth/role-select?mode=${isLogin ? "register" : "login"}`)
+                navigate(`/role-select?mode=${isLogin ? "register" : "login"}`)
               }
             >
               {isLogin ? "Sign up" : "Sign in"}

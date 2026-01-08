@@ -19,7 +19,7 @@ export function MobileLayout({
         minHeight: "100vh",
         bgcolor: "background.default",
         pt: hasNavbar ? "56px" : 0, // 56px matches Toolbar minHeight
-        pb: hasTabBar ? "64px" : 0, // 64px matches BottomNav height
+        pb: hasTabBar ? "104px" : 0, // 72px nav height + 16px margin + 16px padding
       }}
     >
       <Container maxWidth="sm" disableGutters sx={{ p: 0 }}>
